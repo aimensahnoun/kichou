@@ -12,6 +12,7 @@ import { useSystemTheme } from '../hooks/useSystemTheme'
 
 // Dependencies import
 import '@rainbow-me/rainbowkit/styles.css';
+import { motion } from 'framer-motion'
 
 import {
   darkTheme,
@@ -54,10 +55,10 @@ export default function App({ Component, pageProps }: AppProps) {
   // Router
   const router = useRouter()
 
-  if(router.pathname === "/404"){
+  if (router.pathname === "/404") {
     return <Component {...pageProps} />
   }
-  
+
   return <WagmiConfig client={wagmiClient}>
     <RainbowKitProvider theme={
       darkTheme({
@@ -92,11 +93,34 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="telegram:creator" content="@aimensahnoun" />
 
       </Head>
-      <section>
-        <NavBar />
+
+      <NavBar />
+      <motion.section
+        key={router.route}
+        initial="out"
+        animate="in"
+        exit="out"
+        variants={{
+          out: {
+            opacity: 0,
+            y: 40,
+            transition: {
+              duration: 0.9
+            }
+          },
+          in: {
+            opacity: 1,
+            y: 0,
+            transition: {
+              duration: 0.75,
+              delay: 0.1
+            }
+          }
+        }}
+      >
         <Component {...pageProps} />
-      </section>
+      </motion.section>
     </RainbowKitProvider>
   </WagmiConfig>
-  
+
 }

@@ -3,6 +3,7 @@ import Image from 'next/image'
 
 // Dependencies import
 import { useAtom } from 'jotai';
+import { motion } from "framer-motion"
 
 // Utils import
 import { navbarHightAtom } from '../utils/global-state';
@@ -13,7 +14,8 @@ export default function Home() {
   const [navbarHeight] = useAtom(navbarHightAtom);
 
   return (
-    <main className={`w-screen flex flex-col`} style={{
+    <motion.main
+     className={`w-screen flex flex-col`} style={{
       height: `calc(100vh - ${navbarHeight}px)`
     }}>
       <section className='flex flex-col md:flex-row w-full h-full gap-y-12 gap-x-[5rem] justify-center items-center'>
@@ -39,6 +41,6 @@ export default function Home() {
 
       </section>
 
-    </main>
+    </motion.main>
   )
 }
