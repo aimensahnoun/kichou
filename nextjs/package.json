@@ -18,6 +18,7 @@
     "eslint": "8.28.0",
     "eslint-config-next": "13.0.5",
     "ethers": "^5.7.2",
+    "framer-motion": "^7.6.17",
     "jotai": "^1.11.0",
     "next": "13.0.5",
     "react": "18.2.0",

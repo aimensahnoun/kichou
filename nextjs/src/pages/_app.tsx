@@ -5,6 +5,7 @@ import "../styles/Home.sass"
 // NextJs import
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 
 // Custom hooks import
 import { useSystemTheme } from '../hooks/useSystemTheme'
@@ -49,6 +50,14 @@ const wagmiClient = createClient({
 
 export default function App({ Component, pageProps }: AppProps) {
   const theme = useSystemTheme()
+
+  // Router
+  const router = useRouter()
+
+  if(router.pathname === "/404"){
+    return <Component {...pageProps} />
+  }
+  
   return <WagmiConfig client={wagmiClient}>
     <RainbowKitProvider theme={
       darkTheme({
@@ -89,4 +98,5 @@ export default function App({ Component, pageProps }: AppProps) {
       </section>
     </RainbowKitProvider>
   </WagmiConfig>
+  
 }
