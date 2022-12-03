@@ -5,12 +5,22 @@ import { useRouter } from 'next/router';
 // Depenedencies import
 import { BsImages } from 'react-icons/bs';
 import { AiOutlineUser } from 'react-icons/ai';
+import { useAtom } from 'jotai';
+// Custom components import
+import NFT from '../../components/nft';
+
+// Utils import
+import { navbarHightAtom } from "../../utils/global-state"
 
 // Hooks import
 import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollections } from '../../hooks/collection';
+import { Else, If, Then } from 'react-if';
 
 
 export default function Collection() {
+
+    // Global state
+    const [navbarHight] = useAtom(navbarHightAtom);
 
     // Router
     const router = useRouter()
@@ -31,8 +41,9 @@ export default function Collection() {
         return <div>Loading...</div>
     }
 
-    return <main>
-
+    return <main className='w-full' style={{
+        height: `calc(100vh - ${navbarHight}px)`,
+    }}>
         <Head>
             <title>Kichō | {collection?.name}</title>
 
@@ -67,7 +78,7 @@ export default function Collection() {
         <div className='w-full h-fit p-4 bg-slate-400/20 backdrop-blur-sm flex  rounded-b-2xl relative flex-col gap-y-4'>
             <div className='flex items-center justify-center w-full '>
 
-                <img className='w-[10rem] h-[10rem] rounded-lg border-none self-center' src={collection?.nftCount > 0 ? collection?.NFTData.image : `https://www.kichou.xyz/empty-collection.png`} />
+                <img className='w-[10rem] h-[10rem] object-cover rounded-lg border-none self-center' src={collection?.nftCount > 0 ? collection?.NFTData.image : `https://www.kichou.xyz/empty-collection.png`} />
             </div>
 
             <span className='text-2xl font-bold'>{collection?.name}</span>
@@ -87,12 +98,31 @@ export default function Collection() {
         <div className='w-full p-4 overflow-scroll flex flex-col'>
             <span className='font-bold text-xl mb-4'>NFTs:</span>
 
-            {
-                allNfts?.map((nft: any, index: number) => {
-                    return <span key={index}>{JSON.stringify(nft)}</span>
-                })
-            }
+
+            <If condition={collection?.nftCount === 0}>
+
+                <Then>
+                    <div className='w-full h-full flex flex-col gap-y-4 items-center justify-center'>
+
+                        <img src='/empty-collection.png' className='w-[25] h-[25rem] object-cover rounded-lg' alt='Empty Collection'/>
+
+                        <span className='text-2xl font-bold'>No NFTs in this collection</span>
+
+                    </div>
+                </Then>
+                <Else>
+                    <div className='grid gap-4 grid-cols-5 grid-rows-5'>
+                        {
+                            allNfts?.map((nft: any, index: number) => {
+                                return <NFT key={index} nft={nft} />
+                            })
+                        }
+                    </div>
+                </Else>
+            </If>
+
         </div>
+
 
     </main>
 }
