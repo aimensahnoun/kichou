@@ -39,6 +39,7 @@ export const getCollectionFromAddress = async (address: string) => {
     const collectionName = await marketItem.name();
     const collectionSymbol = await marketItem.symbol();
     const nftCount = await marketItem.getNFTCount();
+    const owner = await marketItem.owner();
 
     // Getting the first URI of the first NFT in the collection
     const firstNftURI =
@@ -51,6 +52,7 @@ export const getCollectionFromAddress = async (address: string) => {
       symbol: collectionSymbol,
       nftCount: nftCount.toNumber(),
       NFTData: NFTData ? NFTData.data : null,
+      owner,
     };
   } catch (e) {
     console.error(e);

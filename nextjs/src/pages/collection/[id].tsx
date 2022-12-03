@@ -1,6 +1,12 @@
 // NextJS import
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+
+// Depenedencies import
+import { BsImages } from 'react-icons/bs';
+import { AiOutlineUser } from 'react-icons/ai';
+
+// Hooks import
 import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollections } from '../../hooks/collection';
 
 
@@ -58,7 +64,36 @@ export default function Collection() {
 
         </Head>
 
-        <span>{JSON.stringify(allNfts)}</span>
+        <div className='w-full h-fit p-4 bg-slate-400/20 backdrop-blur-sm flex  rounded-b-2xl relative flex-col gap-y-4'>
+            <div className='flex items-center justify-center w-full '>
+
+                <img className='w-[10rem] h-[10rem] rounded-lg border-none self-center' src={collection?.nftCount > 0 ? collection?.NFTData.image : `https://www.kichou.xyz/empty-collection.png`} />
+            </div>
+
+            <span className='text-2xl font-bold'>{collection?.name}</span>
+            <div className='flex items-center gap-x-4'>
+                <div className='flex items-center gap-x-2'>
+                    <BsImages className='text-lg' />
+                    <span>{collection?.nftCount} NFTs</span>
+                </div>
+
+                <div className='flex items-center gap-x-2'>
+                    <AiOutlineUser className='text-lg' />
+                    <span>Created by: {collection?.owner}</span>
+                </div>
+            </div>
+        </div>
+
+        <div className='w-full p-4 overflow-scroll flex flex-col'>
+            <span className='font-bold text-xl mb-4'>NFTs:</span>
+
+            {
+                allNfts?.map((nft: any, index: number) => {
+                    return <span key={index}>{JSON.stringify(nft)}</span>
+                })
+            }
+        </div>
+
     </main>
 }
 
