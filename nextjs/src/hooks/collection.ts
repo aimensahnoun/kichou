@@ -3,7 +3,9 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import * as MarketItemFactory from "../const/contracts/MarketItemFactory.json";
 import * as MarketItem from "../const/contracts/MarketItem.json";
 import axios from "axios";
+import { useQueryClient } from "wagmi";
 
+// Methods
 export const getAllCollections = async () => {
   try {
     // Load contract from address ethers
@@ -62,7 +64,7 @@ export const prefetchCollections = async (queryClient: QueryClient) => {
   });
 };
 
-
+// Hooks
 export const useGetNFTCollections = () => {
   return useQuery(["collections"], getAllCollections);
 };

@@ -8,7 +8,7 @@ import { If, Else, Then } from 'react-if';
 
 // Components import
 import Collection from '../components/collection';
-import { useGetNFTCollections } from '../hooks/marketplace';
+import { useGetNFTCollections } from '../hooks/collection';
 
 // Utils import
 import { navbarHightAtom } from "../utils/global-state";

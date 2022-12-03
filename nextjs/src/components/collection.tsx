@@ -7,7 +7,7 @@ import { useToken, useContract } from "wagmi"
 
 // Constants import
 import * as MarketItem from "../const/contracts/MarketItem.json"
-import { useGetCollectionFromAddress } from "../hooks/marketplace"
+import { useGetCollectionFromAddress } from "../hooks/collection"
 
 const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
 

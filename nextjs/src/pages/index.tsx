@@ -9,7 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 // Utils import
 import { navbarHightAtom } from '../utils/global-state';
 import { useEffect } from 'react';
-import { prefetchCollections } from '../hooks/marketplace';
+import { prefetchCollections } from '../hooks/collection';
 
 export default function Home() {
 
