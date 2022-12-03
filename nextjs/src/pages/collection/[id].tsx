@@ -54,15 +54,14 @@ export default function Collection({
 export const getStaticProps = async (context: any) => {
 
     const { id } = context.params
-
-    console.log("ID: ", id)
-
     const collection = await getCollectionFromAddress(id)
 
     return {
         props: {
-            collection
-        }
+            collection,
+
+        },
+        revalidate: 1
     }
 };
 
