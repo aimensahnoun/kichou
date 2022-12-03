@@ -13,6 +13,8 @@ import { useSystemTheme } from '../hooks/useSystemTheme'
 // Dependencies import
 import '@rainbow-me/rainbowkit/styles.css';
 import { motion } from 'framer-motion'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import {
   darkTheme,
@@ -30,10 +32,11 @@ import { publicProvider } from 'wagmi/providers/public';
 import NavBar from '../components/navbar'
 
 
+
 const { chains, provider } = configureChains(
   [chain.polygonMumbai],
   [
-    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_POLYGON_API_KEY! }),
+    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY! }),
     publicProvider()
   ]
 );
@@ -49,6 +52,8 @@ const wagmiClient = createClient({
   provider
 })
 
+const queryClient = new QueryClient()
+
 export default function App({ Component, pageProps }: AppProps) {
   const theme = useSystemTheme()
 
@@ -59,68 +64,72 @@ export default function App({ Component, pageProps }: AppProps) {
     return <Component {...pageProps} />
   }
 
-  return <WagmiConfig client={wagmiClient}>
-    <RainbowKitProvider theme={
-      darkTheme({
-        accentColor: '#ED4739',
-      })
-    } chains={chains}>
-      <Head>
-        <title>Kichō</title>
-        <link rel="icon" href={`/images/favicon-${theme}.ico`} />
+  return <QueryClientProvider client={queryClient}>
+    <WagmiConfig client={wagmiClient}>
+      <RainbowKitProvider theme={
+        darkTheme({
+          accentColor: '#ED4739',
+        })
+      } chains={chains}>
+        <Head>
+          <title>Kichō</title>
+          <link rel="icon" href={`/images/favicon-${theme}.ico`} />
 
-        {/* Meta */}
-        <meta property='og:url' content='https://www.kichou.xyz' />
-        <meta property='og:type' content='website' />
-        <meta property='og:title' content='Kichō' />
-        <meta property='og:description' content='Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders.' />
-        <meta property='og:image' content='https://www.kichou.xyz/hero.png' />
-        <meta property='og:image:width' content='1200' />
-        <meta property='og:image:height' content='630' />
-        <meta property='og:site_name' content='Kichō' />
-        <meta property='og:locale' content='en_US' />
-        {/* Twitter Meta */}
-        <meta name='twitter:card' content='summary_large_image' />
-        <meta name='twitter:creator' content='@aimensahnoun' />
-        <meta name='twitter:title' content='Kichō' />
-        <meta name='twitter:description' content='Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders.' />
-        <meta name='twitter:image' content='https://www.kichou.xyz/hero.png' />
-        {/* Telegram meta */}
-        <meta name="telegram:title" content="Kichō" />
-        <meta name="telegram:description" content="Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders." />
-        <meta name="telegram:image" content="https://www.kichou.xyz/hero.png" />
-        <meta name="telegram:image:alt" content="Kichō" />
-        <meta name="telegram:creator" content="@aimensahnoun" />
+          {/* Meta */}
+          <meta property='og:url' content='https://www.kichou.xyz' />
+          <meta property='og:type' content='website' />
+          <meta property='og:title' content='Kichō' />
+          <meta property='og:description' content='Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders.' />
+          <meta property='og:image' content='https://www.kichou.xyz/hero.png' />
+          <meta property='og:image:width' content='1200' />
+          <meta property='og:image:height' content='630' />
+          <meta property='og:site_name' content='Kichō' />
+          <meta property='og:locale' content='en_US' />
+          {/* Twitter Meta */}
+          <meta name='twitter:card' content='summary_large_image' />
+          <meta name='twitter:creator' content='@aimensahnoun' />
+          <meta name='twitter:title' content='Kichō' />
+          <meta name='twitter:description' content='Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders.' />
+          <meta name='twitter:image' content='https://www.kichou.xyz/hero.png' />
+          {/* Telegram meta */}
+          <meta name="telegram:title" content="Kichō" />
+          <meta name="telegram:description" content="Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders." />
+          <meta name="telegram:image" content="https://www.kichou.xyz/hero.png" />
+          <meta name="telegram:image:alt" content="Kichō" />
+          <meta name="telegram:creator" content="@aimensahnoun" />
 
-      </Head>
+        </Head>
 
-      <NavBar />
-      <motion.section
-        key={router.route}
-        initial="out"
-        animate="in"
-        exit="out"
-        variants={{
-          out: {
-            opacity: 0,
-            y: 40,
-            transition: {
-              duration: 0.9
+        <NavBar />
+        <motion.section
+          key={router.route}
+          initial="out"
+          animate="in"
+          exit="out"
+          variants={{
+            out: {
+              opacity: 0,
+              y: 40,
+              transition: {
+                duration: 0.9
+              }
+            },
+            in: {
+              opacity: 1,
+              y: 0,
+              transition: {
+                duration: 0.75,
+                delay: 0.1
+              }
             }
-          },
-          in: {
-            opacity: 1,
-            y: 0,
-            transition: {
-              duration: 0.75,
-              delay: 0.1
-            }
-          }
-        }}
-      >
-        <Component {...pageProps} />
-      </motion.section>
-    </RainbowKitProvider>
-  </WagmiConfig>
+          }}
+        >
+          <Component {...pageProps} />
+        </motion.section>
 
+        <ReactQueryDevtools />
+      </RainbowKitProvider>
+    </WagmiConfig>
+    
+  </QueryClientProvider>
 }

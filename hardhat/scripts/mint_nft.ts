@@ -13,7 +13,7 @@ async function main() {
     providerMumbai
   );
 
-  const contractAddress = "0x25A5E50A9A8fFa2Afe5b3B0e7cDc00876Cf56cfB";
+  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const contract = new ethers.Contract(
     contractAddress,
     TokenItem.abi,
@@ -23,15 +23,15 @@ async function main() {
   //Get the signer
 
   //Create a transaction
-  const transaction = await contract.safeMint(
-    "0x03671423327Cfab41C21060Ed4Bf7f1a4179BcD5",
-    "https://bafybeidmeh7o7ru3z3valfxkounhuvswss657tqld2mzkjw3f6vslpcqmq.ipfs.w3s.link/42"
+  const transaction = await contract.createMarketItem(
+    "DevWars",
+    "Dev"
   );
 
   //Wait for the transaction to be mined
   await transaction.wait();
 
-  console.log("Minted NFT");
+  console.log("Created Collection");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
