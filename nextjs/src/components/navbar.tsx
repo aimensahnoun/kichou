@@ -28,23 +28,37 @@ const NavBar = () => {
         if (height) setNavbarHight(height)
     }, [navbarRef.current])
 
+    // Constants
+    const tabs = [
+        {
+            name: "Marketplace",
+            href: "/marketplace"
+        },
+    ]
+
     return <nav ref={navbarRef} className='flex w-full items-center justify-between  p-4 border-b-[1px] border-b-kichou-gray'>
-        <Link href="/">
-            <div className='flex items-center gap-x-4'>
-                <Image src="/logo.svg" alt='Kichō Logo' width={70} height={70} />
-                <div className='flex flex-col'>
-                    <span className='font-bold text-3xl'>Kichō</span>
-                    <span className='text-kichou-gray font-bold text-xl'>貴重</span>
+
+        <div className="flex gap-x-7 items-center">
+            <Link href="/">
+                <div className='flex items-center gap-x-4'>
+                    <Image src="/logo.svg" alt='Kichō Logo' width={70} height={70} />
+                    <div className='flex flex-col'>
+                        <span className='font-bold text-3xl'>Kichō</span>
+                        <span className='text-kichou-gray font-bold text-xl'>貴重</span>
+                    </div>
+
                 </div>
-
-            </div>
-        </Link>
-        <div className="flex items-center gap-x-4">
-            <Link href="/marketplace">
-                Marketplace
             </Link>
+            <div className="flex items-center gap-x-4">
+                {
+                    tabs.map((tab) => {
+                        return <Link key={tab.href} href={tab.href} className="text-kichou-gray duration-200 hover:text-white hover:shadow-lg hover:shadow-white/30" >
+                            {tab.name}
+                        </Link>
+                    })
+                }
+            </div>
         </div>
-
         <ConnectButton label='Get Started' />
     </nav>
 }
