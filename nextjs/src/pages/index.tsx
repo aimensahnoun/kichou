@@ -4,20 +4,32 @@ import Image from 'next/image'
 // Dependencies import
 import { useAtom } from 'jotai';
 import { motion } from "framer-motion"
+import { useQueryClient } from '@tanstack/react-query';
 
 // Utils import
 import { navbarHightAtom } from '../utils/global-state';
+import { useEffect } from 'react';
+import { prefetchCollections } from '../hooks/marketplace';
 
 export default function Home() {
 
   // Global state
   const [navbarHeight] = useAtom(navbarHightAtom);
 
+  // React Query
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    (async () => {
+      await prefetchCollections(queryClient)
+    })()
+  }, [])
+
   return (
     <motion.main
-     className={`w-screen flex flex-col`} style={{
-      height: `calc(100vh - ${navbarHeight}px)`
-    }}>
+      className={`w-screen flex flex-col`} style={{
+        height: `calc(100vh - ${navbarHeight}px)`
+      }}>
       <section className='flex flex-col md:flex-row w-full h-full gap-y-12 gap-x-[5rem] justify-center items-center'>
         <div className='flex flex-col'>
 

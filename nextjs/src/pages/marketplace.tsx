@@ -46,16 +46,30 @@ export default function Marketplace() {
         } >
             <Then>
                 <div className='flex flex-col items-center justify-center w-full h-full gap-y-4'>
+
+
+
                     <Image src="/empty.png" height={400} width={400} alt="Empty Marketplace" className='rounded-xl' />
                     <h1 className='text-xl font-bold text-center'>We apologize, it seems our marketplace is currently empty</h1>
                 </div>
             </Then>
-            <Else>
-                {
-                    collections!.map((collectionAddress: string, index: number) => {
-                        return <Collection collectionAddress={collectionAddress} key={collectionAddress} />
-                    })
-                }
+            <Else >
+                <div className='p-2 overflow-scroll w-full h-full'>
+                    <div className='flex w-full items-center justify-between mb-4'>
+                        <span className='font-bold text-2xl'>Marketplace
+                        </span>
+
+                        <button className='p-2 rounded-lg bg-kichou-red'>New Collection</button>
+                    </div>
+                    <div className='grid gap-4 grid-cols-5 grid-rows-5'>
+                        {
+
+                            collections!.map((collectionAddress: string, index: number) => {
+                                return <Collection collectionAddress={collectionAddress} key={collectionAddress} />
+                            })
+                        }
+                    </div>
+                </div>
             </Else>
         </If>
 
