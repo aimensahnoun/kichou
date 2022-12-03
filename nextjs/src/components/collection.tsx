@@ -1,6 +1,7 @@
 // Depenedencies import
 import { ethers } from "ethers"
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Else, If, Then } from "react-if"
 import { useToken, useContract } from "wagmi"
@@ -28,23 +29,25 @@ const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
         return null
     }
 
-    return <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
+    return <Link href={`/collection/${collectionAddress}`}>
+        <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
 
-        <div className="w-full h-full mb-2 relative">
-            <If condition={collection?.nftCount === 0}>
-                <Then >
-                    <Image className="object-cover rounded-lg" src="/empty-collection.png" fill alt="Image placehoder" />
-                </Then>
-                <Else>
-                    <img src={collection?.NFTData?.image} alt="Collection First NFT" className="w-full h-full rounded-lg" />
-                </Else>
-            </If>
-        </div>
-        <div className="absolute z-10 bottom-0 bg-slate-400/20 p-2 rounded-lg backdrop-blur-sm h-fit w-full ">
-            <span>{collection?.name}</span>
-        </div>
+            <div className="w-full h-full mb-2 relative">
+                <If condition={collection?.nftCount === 0}>
+                    <Then >
+                        <Image className="object-cover rounded-lg" src="/empty-collection.png" fill alt="Image placehoder" />
+                    </Then>
+                    <Else>
+                        <img src={collection?.NFTData?.image} alt="Collection First NFT" className="w-full h-full rounded-lg" />
+                    </Else>
+                </If>
+            </div>
+            <div className="absolute z-10 bottom-0 bg-slate-400/20 p-2 rounded-lg backdrop-blur-sm h-fit w-full ">
+                <span>{collection?.name}</span>
+            </div>
 
-    </div>
+        </div>
+    </Link>
 }
 
 export default Collection
