@@ -37,6 +37,6 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     }
 
     function getNFTCount() public view returns (uint256) {
-        return _tokenIdCounter.current() - 1;
+        return _tokenIdCounter.current();
     }
 }

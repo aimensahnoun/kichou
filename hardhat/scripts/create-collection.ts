@@ -16,7 +16,7 @@ async function main() {
 
   console.log("Wallet balance : ", ethers.utils.formatEther(balance));
   //   Get contract from address
-  const contractAddress = "0x38D480F32F2118348817f37d7366bFeAfFD5a14e";
+  const contractAddress = "0xC8b41537b6d6926a2a57F574F4EeaD4C84695EC5";
 
   const contract = new ethers.Contract(
     contractAddress,
@@ -28,7 +28,7 @@ async function main() {
 
   console.log("Collections: ", collections);
 
-  const transaction = await contract.createMarketItem("DevWars", "Dev");
+  const transaction = await contract.createMarketItem("Kichou", "NFT");
 
   await transaction.wait();
 
