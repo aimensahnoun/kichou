@@ -19,6 +19,9 @@ export default function Marketplace() {
     // React Query
     const { data: collections, isLoading } = useGetNFTCollections()
 
+
+    
+
     // Global state
     const [navbarHeight] = useAtom(navbarHightAtom);
 

@@ -1,19 +1,28 @@
 // Depenedencies import
+import { useQueryClient } from "@tanstack/react-query"
 import { ethers } from "ethers"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Else, If, Then } from "react-if"
-import { useToken, useContract } from "wagmi"
+
 
 // Constants import
-import * as MarketItem from "../const/contracts/MarketItem.json"
-import { useGetCollectionFromAddress } from "../hooks/collection"
+import { prefetchCollectionsNFTs, useGetCollectionFromAddress } from "../hooks/collection"
 
 const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
 
     // React Query
     const { data: collection, isLoading, isFetched } = useGetCollectionFromAddress(collectionAddress)
+
+    // Clients
+    const queryClient = useQueryClient()
+
+    useEffect(() => {
+        (async () => {
+            await prefetchCollectionsNFTs(queryClient, collectionAddress)
+        })()
+    }, [])
 
     if (isLoading) {
         return <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">

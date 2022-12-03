@@ -23,7 +23,7 @@ async function main() {
   //Create a transaction
   const transaction = await contract.safeMint(
     "0x93da76CFc683E1536C91d37abcfE17a60c29B578",
-    "https://bafybeidmeh7o7ru3z3valfxkounhuvswss657tqld2mzkjw3f6vslpcqmq.ipfs.w3s.link/42"
+    "https://bafkreicjwewjpakyrnwezliomau4gfivbkycqbkem2exi6jxz2iprnzfcu.ipfs.w3s.link/?filename=1"
   );
 
   //Wait for the transaction to be mined

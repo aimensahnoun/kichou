@@ -57,11 +57,50 @@ export const getCollectionFromAddress = async (address: string) => {
   }
 };
 
+export const getAllCollectionsNfts = async (address: string) => {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_ALCHEMY_MUMBAI
+    );
+
+    const marketItem = new ethers.Contract(address, MarketItem.abi, provider);
+
+    const nftCount = await marketItem.getNFTCount();
+
+    const nfts = [];
+
+    for (let i = 0; i < nftCount.toNumber(); i++) {
+      const nftURI = await marketItem.tokenURI(i);
+      const NFTData = await axios.get(nftURI);
+
+      nfts.push(NFTData.data);
+    }
+
+    return nfts;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const prefetchCollections = async (queryClient: QueryClient) => {
   await queryClient.prefetchQuery({
     queryKey: ["collections"],
     queryFn: getAllCollections,
   });
+};
+
+export const prefetchCollectionsNFTs = async (
+  queryClient: QueryClient,
+  address: string
+) => {
+  try {
+    await queryClient.prefetchQuery({
+      queryKey: ["collectionsNFTs", address],
+      queryFn: () => getAllCollectionsNfts(address),
+    });
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 // Hooks
@@ -72,5 +111,11 @@ export const useGetNFTCollections = () => {
 export const useGetCollectionFromAddress = (address: string) => {
   return useQuery(["collection", address], () =>
     getCollectionFromAddress(address)
+  );
+};
+
+export const useGetAllCollectionsNfts = (address: string) => {
+  return useQuery(["collectionsNFTs", address], () =>
+    getAllCollectionsNfts(address)
   );
 };
