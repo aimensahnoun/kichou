@@ -7,14 +7,15 @@ import { BsImages } from 'react-icons/bs';
 import { AiOutlineUser } from 'react-icons/ai';
 import { useAtom } from 'jotai';
 // Custom components import
-import NFT from '../../components/nft';
+
 
 // Utils import
-import { navbarHightAtom } from "../../utils/global-state"
+import { navbarHightAtom } from "../../../utils/global-state"
 
 // Hooks import
-import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollections } from '../../hooks/collection';
+import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollections } from '../../../hooks/collection';
 import { Else, If, Then } from 'react-if';
+import NFT from '../../../components/nft';
 
 
 export default function Collection() {
@@ -114,7 +115,7 @@ export default function Collection() {
                     <div className='grid gap-4 grid-cols-5 grid-rows-5'>
                         {
                             allNfts?.map((nft: any, index: number) => {
-                                return <NFT key={index} nft={nft} />
+                                return <NFT key={index} nft={nft} collectionId={id as string} nftIndex={index} />
                             })
                         }
                     </div>

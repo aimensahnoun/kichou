@@ -9,12 +9,15 @@ import { Else, If, Then } from "react-if"
 
 // Constants import
 import { prefetchCollectionsNFTs, useGetCollectionFromAddress } from "../hooks/collection"
+import { usePrefetchNFTByID } from "../hooks/nft"
 
-const NFT = ({ nft }: { nft: any }) => {
+const NFT = ({ nft, collectionId, nftIndex }: { nft: any, collectionId: string, nftIndex: number }) => {
 
 
+    // React Query
+    usePrefetchNFTByID(collectionId , nftIndex)
 
-    return <Link href={`/collection`}>
+    return <Link href={`/collection/${collectionId}/${nftIndex}`}>
         <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
 
             <div className="w-full h-full mb-2 relative">
