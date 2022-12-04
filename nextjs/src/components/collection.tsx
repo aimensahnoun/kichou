@@ -14,21 +14,14 @@ import {motion} from "framer-motion"
 
 
 // Constants import
-import { prefetchCollectionsNFTs, useGetCollectionFromAddress } from "../hooks/collection"
+import { prefetchCollectionsNFTs, useGetCollectionFromAddress, usePrefetchCollectionsNFTs } from "../hooks/collection"
 
 const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
 
     // React Query
     const { data: collection, isLoading, isFetched } = useGetCollectionFromAddress(collectionAddress)
-
-    // Clients
-    const queryClient = useQueryClient()
-
-    useEffect(() => {
-        (async () => {
-            await prefetchCollectionsNFTs(queryClient, collectionAddress)
-        })()
-    }, [])
+    usePrefetchCollectionsNFTs(collectionAddress)
+  
 
     if (isLoading) {
         return <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">

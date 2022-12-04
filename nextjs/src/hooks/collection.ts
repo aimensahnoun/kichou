@@ -1,8 +1,14 @@
 import { ethers, Signer } from "ethers";
-import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import * as MarketItemFactory from "../const/contracts/MarketItemFactory.json";
 import * as MarketItem from "../const/contracts/MarketItem.json";
 import axios from "axios";
+import { useEffect } from "react";
 
 // Methods
 export const getAllCollections = async () => {
@@ -104,9 +110,12 @@ export const prefetchCollectionsNFTs = async (
   }
 };
 
-export const createCollection = async (signer : Signer , name : string , symbol : string ) => {
-
-  if(!signer) return;
+export const createCollection = async (
+  signer: Signer,
+  name: string,
+  symbol: string
+) => {
+  if (!signer) return;
 
   try {
     const marketItemFactory = new ethers.Contract(
@@ -120,10 +129,10 @@ export const createCollection = async (signer : Signer , name : string , symbol 
     await tx.wait();
 
     return tx;
-  }catch(e){
-    console.error(e)
+  } catch (e) {
+    console.error(e);
   }
-}
+};
 
 // Hooks
 export const useGetNFTCollections = () => {
@@ -142,12 +151,36 @@ export const useGetAllCollectionsNfts = (address: string) => {
   );
 };
 
-export const useCreateCollection = (signer : Signer , name :string , symbol : string) => {
+export const usePrefetchCollections = async () => {
   const queryClient = useQueryClient();
 
-  return useMutation(() => createCollection(signer , name , symbol), {
+  useEffect(() => {
+    (async () => {
+      await prefetchCollections(queryClient);
+    })();
+  }, []);
+};
+
+export const usePrefetchCollectionsNFTs = async (address: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    (async () => {
+      await prefetchCollectionsNFTs(queryClient, address);
+    })();
+  }, []);
+};
+
+export const useCreateCollection = (
+  signer: Signer,
+  name: string,
+  symbol: string
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(() => createCollection(signer, name, symbol), {
     onSuccess: () => {
       queryClient.invalidateQueries(["collections"]);
-    }
-  })
-}
+    },
+  });
+};
