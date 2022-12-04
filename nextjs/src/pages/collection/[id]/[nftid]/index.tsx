@@ -32,21 +32,25 @@ export default function Collection() {
     const router = useRouter()
     const { id, nftid } = router.query
 
+    console.log(router.query)
+
     //  React Query
     const { data: nftData, isLoading: loadingNFT } = useGetNFTById(id as string, parseInt(nftid! as string))
 
     if (loadingNFT) return <div>Loading...</div>
 
-    if (!loadingNFT) {
-
+    if (!loadingNFT && nftData == null && id !== undefined && nftid !== undefined) {
+        router.replace("/404")
     }
+
+
 
 
     return <main className='w-full flex p-6 gap-x-[5rem] items-center' style={{
         height: `calc(100vh - ${navbarHight}px)`,
     }}>
         <div className='flex h-[75%] w-[85%] justify-between'>
-            <img className='h-full w-[25rem] rounded-lg shadow-lg object-cover' alt="NFT Image" src={nftData?.image} />
+            <img className='h-full w-[25rem] rounded-lg shadow-lg object-cover border-[1px] border-white/40' alt="NFT Image" src={nftData?.image} />
 
             <div className='flex flex-col gap-y-4'>
                 <span className='text-2xl font-bold'>{nftData?.name}</span>
