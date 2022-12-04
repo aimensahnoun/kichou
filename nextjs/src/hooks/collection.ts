@@ -1,9 +1,8 @@
-import { ethers } from "ethers";
-import { QueryClient, useQuery } from "@tanstack/react-query";
+import { ethers, Signer } from "ethers";
+import { QueryClient, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as MarketItemFactory from "../const/contracts/MarketItemFactory.json";
 import * as MarketItem from "../const/contracts/MarketItem.json";
 import axios from "axios";
-import { useQueryClient } from "wagmi";
 
 // Methods
 export const getAllCollections = async () => {
@@ -105,6 +104,27 @@ export const prefetchCollectionsNFTs = async (
   }
 };
 
+export const createCollection = async (signer : Signer , name : string , symbol : string ) => {
+
+  if(!signer) return;
+
+  try {
+    const marketItemFactory = new ethers.Contract(
+      "0xC8b41537b6d6926a2a57F574F4EeaD4C84695EC5",
+      MarketItemFactory.abi,
+      signer
+    );
+
+    const tx = await marketItemFactory.createMarketItem(name, symbol);
+
+    await tx.wait();
+
+    return tx;
+  }catch(e){
+    console.error(e)
+  }
+}
+
 // Hooks
 export const useGetNFTCollections = () => {
   return useQuery(["collections"], getAllCollections);
@@ -121,3 +141,13 @@ export const useGetAllCollectionsNfts = (address: string) => {
     getAllCollectionsNfts(address)
   );
 };
+
+export const useCreateCollection = (signer : Signer , name :string , symbol : string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(() => createCollection(signer , name , symbol), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["collections"]);
+    }
+  })
+}

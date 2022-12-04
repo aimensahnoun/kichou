@@ -4,6 +4,7 @@ import { useState } from "react"
 // Depenedencies import
 import { motion } from "framer-motion"
 import { useSigner } from "wagmi"
+import { useCreateCollection } from "../hooks/collection"
 
 const divVariant = {
     out: {
@@ -40,6 +41,12 @@ const CreateCollectionModal = ({
     // Wagmi hooks
     const { data: signer, isLoading: isLoadingSigner } = useSigner()
 
+    // Event handlers
+    const { mutateAsync: createCollection, isLoading: creatingCollection } = useCreateCollection(
+        signer!,
+        collectionName,
+        collectionSymbol
+    )
 
     // Methods
     const isFormInputValid = () => {
@@ -75,15 +82,19 @@ const CreateCollectionModal = ({
             </div>
 
             <div className="flex items-center justify-center w-full gap-x-4 mt-4">
-                <motion.button
+                {!creatingCollection && <motion.button
                     onClick={() => {
                         setIsModalOpen(false)
                     }}
                     className="p-2 rounded-lg bg-slate-400/40 "
 
-                >Cancel</motion.button>
+                >Cancel</motion.button>}
 
                 <motion.button
+                    onClick={async () => {
+                        await createCollection()
+                        setIsModalOpen(false)
+                    }}
                     disabled={!isFormInputValid()}
                     whileHover={{
                         scale: 1.1,
@@ -97,7 +108,7 @@ const CreateCollectionModal = ({
                             duration: 0.1
                         }
                     }}
-                    className={`p-2 rounded-lg bg-kichou-red ${!isFormInputValid() ? "bg-slate-400/20 cursor-not-allowed" : ""}`}>Create</motion.button>
+                    className={`p-2 rounded-lg bg-kichou-red ${!isFormInputValid() ? "bg-slate-400/20 cursor-not-allowed" : ""}`}>{creatingCollection ? "Loading..." : "Submit"}</motion.button>
             </div>
 
         </motion.div>
