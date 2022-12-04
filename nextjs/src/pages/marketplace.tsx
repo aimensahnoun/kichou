@@ -1,8 +1,11 @@
 // NextJS import
 import Head from 'next/head';
 
+// React import
+import { useState } from 'react';
+
 // Depenedencies import
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { If, Else, Then } from 'react-if';
 
@@ -13,6 +16,7 @@ import { useGetNFTCollections } from '../hooks/collection';
 // Utils import
 import { navbarHightAtom } from "../utils/global-state";
 import Image from 'next/image';
+import CreateCollectionModal from '../components/create-collection-modal';
 
 
 export default function Marketplace() {
@@ -20,7 +24,8 @@ export default function Marketplace() {
     const { data: collections, isLoading } = useGetNFTCollections()
 
 
-    
+    // Local State
+    const [isCreateCollectionModalOpen, setIsCreateCollectionModalOpen] = useState(false)
 
     // Global state
     const [navbarHeight] = useAtom(navbarHightAtom);
@@ -50,8 +55,6 @@ export default function Marketplace() {
             <Then>
                 <div className='flex flex-col items-center justify-center w-full h-full gap-y-4'>
 
-
-
                     <Image src="/empty.png" height={400} width={400} alt="Empty Marketplace" className='rounded-xl' />
                     <h1 className='text-xl font-bold text-center'>We apologize, it seems our marketplace is currently empty</h1>
                 </div>
@@ -62,7 +65,10 @@ export default function Marketplace() {
                         <span className='font-bold text-2xl'>Marketplace
                         </span>
 
-                        <button className='p-2 rounded-lg bg-kichou-red'>New Collection</button>
+                        <motion.button
+                            onClick={() => setIsCreateCollectionModalOpen(true)}
+
+                            className='p-2 rounded-lg bg-kichou-red'>New Collection</motion.button>
                     </div>
                     <div className='grid gap-4 grid-cols-5 grid-rows-5'>
                         {
@@ -77,6 +83,12 @@ export default function Marketplace() {
         </If>
 
 
+        <AnimatePresence>
+            {
+                isCreateCollectionModalOpen &&
+                <CreateCollectionModal setIsModalOpen={setIsCreateCollectionModalOpen}  />
+            }
+        </AnimatePresence>
 
     </motion.main>
 }

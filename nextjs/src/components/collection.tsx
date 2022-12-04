@@ -1,10 +1,16 @@
+// NextJS import
+import Link from "next/link"
+import Image from "next/image"
+
+// React import
+import { useEffect, useState } from "react"
+
+
 // Depenedencies import
 import { useQueryClient } from "@tanstack/react-query"
 import { ethers } from "ethers"
-import Image from "next/image"
-import Link from "next/link"
-import { useEffect, useState } from "react"
 import { Else, If, Then } from "react-if"
+import {motion} from "framer-motion"
 
 
 // Constants import
@@ -47,7 +53,7 @@ const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
                         <Image className="object-cover rounded-lg" src="/empty-collection.png" fill alt="Image placehoder" />
                     </Then>
                     <Else>
-                        <img src={collection?.NFTData?.image} alt="Collection First NFT" className="w-full h-full rounded-lg" />
+                        <motion.img src={collection?.NFTData?.image} alt="Collection First NFT" className="w-full h-full rounded-lg" />
                     </Else>
                 </If>
             </div>
