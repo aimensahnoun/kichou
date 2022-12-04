@@ -2,14 +2,14 @@ import { ethers } from "hardhat";
 
 async function main() {
   const MarketItemFactory = await ethers.getContractFactory(
-    "MarketItemFactory"
+    "MarketPlace"
   );
 
   const marketItemFactory = await MarketItemFactory.deploy();
 
   await marketItemFactory.deployed();
 
-  console.log("MarketItemFactory deployed to:", marketItemFactory.address);
+  console.log("MarketPlace deployed to:", marketItemFactory.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

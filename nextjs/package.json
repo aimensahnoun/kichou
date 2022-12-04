@@ -29,9 +29,12 @@
     "react-if": "^4.1.4",
     "react-use-system-theme": "^1.1.1",
     "typescript": "4.9.3",
-    "wagmi": "^0.8.8"
+    "validator": "^13.7.0",
+    "wagmi": "^0.8.8",
+    "web3.storage": "^4.4.0"
   },
   "devDependencies": {
+    "@types/validator": "^13.7.10",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.19",
     "sass": "^1.56.1",

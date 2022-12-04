@@ -6,6 +6,7 @@ import { useRouter } from 'next/router';
 import { BsImages } from 'react-icons/bs';
 import { AiOutlineUser } from 'react-icons/ai';
 import { useAtom } from 'jotai';
+import { useAccount } from 'wagmi';
 // Custom components import
 
 
@@ -22,6 +23,9 @@ export default function Collection() {
 
     // Global state
     const [navbarHight] = useAtom(navbarHightAtom);
+
+    // Wagmi hooks
+    const { address } = useAccount()
 
     // Router
     const router = useRouter()
@@ -97,7 +101,12 @@ export default function Collection() {
         </div>
 
         <div className='w-full p-4 overflow-scroll flex flex-col'>
-            <span className='font-bold text-xl mb-4'>NFTs:</span>
+            <div className='w-full flex items-center justify-between'>
+                <span className='font-bold text-xl mb-4'>NFTs:</span>
+                {
+                    address === collection?.owner && <button className='bg-slate-400/20 backdrop-blur-sm p-2 rounded-lg text-slate-400 hover:bg-slate-400 hover:text-white transition-all duration-200' onClick={() => router.push(`/collection/${id}/mint-nft`)}>Mint NFT</button>
+                }
+            </div>
 
 
             <If condition={collection?.nftCount === 0}>
@@ -105,7 +114,7 @@ export default function Collection() {
                 <Then>
                     <div className='w-full h-full flex flex-col gap-y-4 items-center justify-center'>
 
-                        <img src='/empty-collection.png' className='w-[25] h-[25rem] object-cover rounded-lg' alt='Empty Collection'/>
+                        <img src='/empty-collection.png' className='w-[25] h-[25rem] object-cover rounded-lg' alt='Empty Collection' />
 
                         <span className='text-2xl font-bold'>No NFTs in this collection</span>
 

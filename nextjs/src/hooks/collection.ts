@@ -9,6 +9,7 @@ import * as MarketItemFactory from "../const/contracts/MarketItemFactory.json";
 import * as MarketItem from "../const/contracts/MarketItem.json";
 import axios from "axios";
 import { useEffect } from "react";
+import { MARKETPLACE_ADDRESS } from "../const/contracts/contractInfo";
 
 // Methods
 export const getAllCollections = async () => {
@@ -19,7 +20,7 @@ export const getAllCollections = async () => {
     );
 
     const marketItemFactory = new ethers.Contract(
-      "0xC8b41537b6d6926a2a57F574F4EeaD4C84695EC5",
+      MARKETPLACE_ADDRESS,
       MarketItemFactory.abi,
       provider
     );
@@ -40,11 +41,17 @@ export const getCollectionFromAddress = async (address: string) => {
 
     const marketItem = new ethers.Contract(address, MarketItem.abi, provider);
 
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      provider
+    );
+
     // Getting collection information
     const collectionName = await marketItem.name();
     const collectionSymbol = await marketItem.symbol();
     const nftCount = await marketItem.getNFTCount();
-    const owner = await marketItem.owner();
+    const owner = await marketPlace.collectionToOwner(address);
 
     // Getting the first URI of the first NFT in the collection
     const firstNftURI =
@@ -119,7 +126,7 @@ export const createCollection = async (
 
   try {
     const marketItemFactory = new ethers.Contract(
-      "0xC8b41537b6d6926a2a57F574F4EeaD4C84695EC5",
+      MARKETPLACE_ADDRESS,
       MarketItemFactory.abi,
       signer
     );

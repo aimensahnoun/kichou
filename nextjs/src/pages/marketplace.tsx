@@ -52,7 +52,16 @@ export default function Marketplace() {
             <meta property="og:image" content="https://kicho.io/hero.png" />
 
         </Head>
+        <div className='flex w-full items-center justify-between mb-4'>
+                        <span className='font-bold text-2xl'>Marketplace
+                        </span>
 
+                        {isConnected && <motion.button
+                            onClick={() => setIsCreateCollectionModalOpen(true)}
+
+                            className='p-2 rounded-lg bg-kichou-red'>New Collection</motion.button>}
+                    </div>
+    
         <If condition={
             collections?.length === 0
         } >
@@ -65,15 +74,7 @@ export default function Marketplace() {
             </Then>
             <Else >
                 <div className='p-2 overflow-scroll w-full h-full'>
-                    <div className='flex w-full items-center justify-between mb-4'>
-                        <span className='font-bold text-2xl'>Marketplace
-                        </span>
-
-                        {isConnected && <motion.button
-                            onClick={() => setIsCreateCollectionModalOpen(true)}
-
-                            className='p-2 rounded-lg bg-kichou-red'>New Collection</motion.button>}
-                    </div>
+                    
                     <div className='grid gap-4 grid-cols-5 grid-rows-5'>
                         {
 
