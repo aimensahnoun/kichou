@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAtom } from 'jotai';
 import { If, Else, Then } from 'react-if';
+import { useAccount } from 'wagmi';
 
 // Components import
 import Collection from '../components/collection';
@@ -29,6 +30,9 @@ export default function Marketplace() {
 
     // Global state
     const [navbarHeight] = useAtom(navbarHightAtom);
+
+    // Wagmi hooks
+    const { isConnected } = useAccount()
 
     if (isLoading) {
         return <div>Loading...</div>
@@ -65,10 +69,10 @@ export default function Marketplace() {
                         <span className='font-bold text-2xl'>Marketplace
                         </span>
 
-                        <motion.button
+                        {isConnected && <motion.button
                             onClick={() => setIsCreateCollectionModalOpen(true)}
 
-                            className='p-2 rounded-lg bg-kichou-red'>New Collection</motion.button>
+                            className='p-2 rounded-lg bg-kichou-red'>New Collection</motion.button>}
                     </div>
                     <div className='grid gap-4 grid-cols-5 grid-rows-5'>
                         {
@@ -86,7 +90,7 @@ export default function Marketplace() {
         <AnimatePresence>
             {
                 isCreateCollectionModalOpen &&
-                <CreateCollectionModal setIsModalOpen={setIsCreateCollectionModalOpen}  />
+                <CreateCollectionModal setIsModalOpen={setIsCreateCollectionModalOpen} />
             }
         </AnimatePresence>
 
