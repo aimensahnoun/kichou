@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-import TokenItemFactory from "../artifacts/contracts/MarketItemFactory.sol/MarketItemFactory.json";
+import TokenItemFactory from "../artifacts/contracts/MarketPlace.sol/MarketPlace.json";
 
 async function main() {
   const provider = new ethers.providers.JsonRpcProvider(

@@ -7,6 +7,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+error MarketItem__CannotMintToZeroAddress(address to);
+error MarketItem__OnlyOwnerCanMint(address collection);
+error MarketItem__OnlyOwnerCanSetNFTForSale();
+
 contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     using Counters for Counters.Counter;
 
@@ -17,11 +21,16 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         string memory _collectionSymbol
     ) ERC721(_collectionName, _collectionSymbol) {}
 
-    function safeMint(address to, string memory uri) public onlyOwner {
+    function safeMint(
+        address to,
+        string memory uri
+    ) public onlyOwner returns (uint256) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+
+        return tokenId;
     }
 
     function _burn(
