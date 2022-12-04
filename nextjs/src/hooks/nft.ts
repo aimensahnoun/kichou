@@ -31,8 +31,12 @@ export const getCollectionFromAddress = async (
 
     const nftURI = await marketItem.tokenURI(nftId);
     const NFTData = await axios.get(nftURI);
+    const NFTOwner = await marketItem.ownerOf(nftId);
 
-    return NFTData.data;
+    return {
+      ...NFTData.data,
+      owner: NFTOwner,
+    };
   } catch (e) {
     console.error(e);
   }
