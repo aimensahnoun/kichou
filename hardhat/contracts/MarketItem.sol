@@ -19,7 +19,9 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     constructor(
         string memory _collectionName,
         string memory _collectionSymbol
-    ) ERC721(_collectionName, _collectionSymbol) {}
+    ) ERC721(_collectionName, _collectionSymbol) {
+        _tokenIdCounter.increment();
+    }
 
     function safeMint(
         address to,
@@ -46,6 +48,6 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     }
 
     function getNFTCount() public view returns (uint256) {
-        return _tokenIdCounter.current();
+        return _tokenIdCounter.current() - 1;
     }
 }

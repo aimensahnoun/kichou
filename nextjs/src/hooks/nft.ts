@@ -100,17 +100,28 @@ export const usePrefetchNFTByID = async (
   }, []);
 };
 
-export const useMintNFT = (
-  signer :Signer,
-  collectionAddress: string,
-  to: string,
-  tokenURI: string
-) => {
+export const useMintNFT = () => {
   const queryClient = useQueryClient();
 
-  return useMutation(() => mintNFT(signer!, collectionAddress, to, tokenURI), {
-    onSuccess: () => {
-      queryClient.invalidateQueries(["collectionsNFTs", collectionAddress]);
-    },
-  });
+  return useMutation(
+    (data: {
+      signer: Signer;
+      collectionAddress: string;
+      to: string;
+      tokenURI: string;
+    }) => mintNFT(data.signer, data.collectionAddress, data.to, data.tokenURI),
+    {
+      onSuccess: (data: {
+        signer: Signer;
+        collectionAddress: string;
+        to: string;
+        tokenURI: string;
+      }) => {
+        queryClient.invalidateQueries([
+          "collectionsNFTs",
+          data.collectionAddress,
+        ]);
+      },
+    }
+  );
 };

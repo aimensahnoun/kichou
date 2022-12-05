@@ -124,7 +124,7 @@ export default function Collection() {
                     <div className='grid gap-4 grid-cols-5 grid-rows-5'>
                         {
                             allNfts?.map((nft: any, index: number) => {
-                                return <NFT key={index} nft={nft} collectionId={id as string} nftIndex={index} />
+                                return <NFT key={index} nft={nft} collectionId={id as string} nftIndex={index + 1} />
                             })
                         }
                     </div>

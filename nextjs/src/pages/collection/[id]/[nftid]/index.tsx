@@ -49,7 +49,7 @@ export default function Collection() {
     return <main className='w-full flex p-6 gap-x-[5rem] items-center' style={{
         height: `calc(100vh - ${navbarHight}px)`,
     }}>
-        <div className='flex h-[75%] w-[85%] justify-between'>
+        <div className='flex h-[75%] w-full   gap-x-[5rem]'>
             <img className='h-full w-[25rem] rounded-lg shadow-lg object-cover border-[1px] border-white/40' alt="NFT Image" src={nftData?.image} />
 
             <div className='flex flex-col gap-y-4'>
@@ -62,8 +62,8 @@ export default function Collection() {
                 <div className="w-full border-[1px] bg-slate-200/20 backdrop-blur-sm rounded-lg" />
 
                 <label className='font-bold'>Attributes: </label>
-                <div className='flex flex-col gap-y-2'>
-                    {nftData?.attributes.map((attribute: any) => <div key={attribute} className='flex items-center gap-x-2 flex-wrap'>
+                <div className='flex gap-2 gap-y-2 flex-wrap'>
+                    {nftData?.attributes.map((attribute: any) => <div key={attribute} className='flex items-center gap-x-2'>
                         <span className='p-2 rounded-lg bg-slate-400/40 font-bold'>{attribute.trait_type}</span>
                     </div>)}
                 </div>

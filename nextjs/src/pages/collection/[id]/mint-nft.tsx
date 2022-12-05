@@ -45,7 +45,7 @@ export default function MintNFT() {
     // React Query
     const { data: allCollections, isLoading: areCollectionsLoading, isFetched: areCollectionsFetched } = useGetNFTCollections()
 
-    const { mutateAsync: mintNFT, isSuccess: mintedSuccessfully , isError: unableToMint } = useMintNFT(signer!, id as string, receiverAddress, nftUri)
+    const { mutateAsync: mintNFT, isSuccess: mintedSuccessfully, isError: unableToMint } = useMintNFT()
 
 
     if (id && !areCollectionsLoading && areCollectionsFetched && (allCollections.length === 0 || allCollections.filter((collection: string) => collection === id).length === 0)) {
@@ -87,13 +87,16 @@ export default function MintNFT() {
 
             console.log(`Matadata stored at: ${url}`)
 
-            await mintNFT()
+            await mintNFT(
+                {
+                    signer: signer!,
+                    collectionAddress: id as string,
+                    to: receiverAddress,
+                    tokenURI: url
+                }
+            )
 
-            if(mintedSuccessfully){
-                router.replace(`/collection/${id}`)
-            }
-            
-            
+            router.replace(`/collection/${id}`)
 
             setIsMintingNFT(false)
 

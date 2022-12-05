@@ -55,7 +55,7 @@ export const getCollectionFromAddress = async (address: string) => {
 
     // Getting the first URI of the first NFT in the collection
     const firstNftURI =
-      nftCount.toNumber() > 0 ? await marketItem.tokenURI(0) : null;
+      nftCount.toNumber() > 0 ? await marketItem.tokenURI(1) : null;
 
     const NFTData = firstNftURI ? await axios.get(firstNftURI) : null;
 
@@ -83,7 +83,7 @@ export const getAllCollectionsNfts = async (address: string) => {
 
     const nfts = [];
 
-    for (let i = 0; i < nftCount.toNumber(); i++) {
+    for (let i = 1; i <= nftCount.toNumber(); i++) {
       const nftURI = await marketItem.tokenURI(i);
       const NFTData = await axios.get(nftURI);
 

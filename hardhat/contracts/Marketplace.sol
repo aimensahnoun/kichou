@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./MarketItem.sol";
 
@@ -18,8 +19,15 @@ error MarketPlace__CannotBuyOwnNFT();
 error MarketPlace__OfferedFundsAreLowerThenPrice();
 error MarketPlace__FundsAreZero();
 error MarketPlace__CannotBuyNFTThatIsNotForSale();
+error MarketPlace__CollectionNameCannotBeEmpty();
+error MarketPlace__CollectionSymbolCannotBeEmpty();
+error MarketPlace__NFTNotForSale();
 
 contract MarketPlace is Ownable {
+    using Counters for Counters.Counter;
+    Counters.Counter private _collectionCounter;
+    Counters.Counter private _totalNFTCounter;
+
     event MarketItemCreated(address indexed itemAddress, address indexed owner);
 
     uint256 public marketPlacePercentage = 10;
@@ -58,10 +66,19 @@ contract MarketPlace is Ownable {
         string memory _name,
         string memory _symbol
     ) external {
+        if (keccak256(bytes(_name)) == keccak256(bytes(""))) {
+            revert MarketPlace__CollectionNameCannotBeEmpty();
+        }
+
+        if (keccak256(bytes(_symbol)) == keccak256(bytes(""))) {
+            revert MarketPlace__CollectionSymbolCannotBeEmpty();
+        }
+
         MarketItem marketItem = new MarketItem(_name, _symbol);
         collections.push(address(marketItem));
         collectionToOwner[address(marketItem)] = msg.sender;
         ownerToCollections[msg.sender].push(address(marketItem));
+        _collectionCounter.increment();
         emit MarketItemCreated(address(marketItem), msg.sender);
     }
 
@@ -81,8 +98,8 @@ contract MarketPlace is Ownable {
         return collectionToOwner[_collection];
     }
 
-    function getCollectionCount() external view returns (uint256) {
-        return collections.length;
+    function collectionCount() external view returns (uint256) {
+        return _collectionCounter.current();
     }
 
     // NFT Methods
@@ -94,7 +111,7 @@ contract MarketPlace is Ownable {
         address collectionOwner = collectionToOwner[_collection];
 
         // Check if the collection exists
-        if (collectionOwner != address(0)) {
+        if (collectionOwner == address(0)) {
             revert MarketPlace__CollectionDoesNotExist(_collection);
         }
 
@@ -127,6 +144,7 @@ contract MarketPlace is Ownable {
         }
 
         ownerToNFTs[_to][_collection].push(tokenId);
+        _totalNFTCounter.increment();
     }
 
     function getCollectionByUser(
@@ -140,6 +158,10 @@ contract MarketPlace is Ownable {
         address _collection
     ) external view returns (uint256[] memory) {
         return ownerToNFTs[_owner][_collection];
+    }
+
+    function totalNFTCount() external view returns (uint256) {
+        return _totalNFTCounter.current();
     }
 
     // NFT Owner Methods
@@ -160,21 +182,24 @@ contract MarketPlace is Ownable {
 
         nfts[_collection][_tokenId].price = _price;
         nfts[_collection][_tokenId].isForSale = true;
-
-        marketItem.approve(address(this), _tokenId);
     }
 
     function removeNFTFromSale(address _collection, uint256 _tokenId) external {
         MarketItem marketItem = MarketItem(_collection);
 
+        NFT memory nft = nfts[_collection][_tokenId];
+
         if (marketItem.ownerOf(_tokenId) != msg.sender) {
             revert MarketPlace__OnlyOwnerCanSellNFT();
+        }
+
+        if (!nft.isForSale) {
+            revert MarketPlace__NFTNotForSale();
         }
 
         nfts[_collection][_tokenId].price = 0;
         nfts[_collection][_tokenId].isForSale = false;
 
-        marketItem.setApprovalForAll(address(this), false);
     }
 
     // NFT Buyer Methods
