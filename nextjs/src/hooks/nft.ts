@@ -1,4 +1,4 @@
-import { ethers, Signer } from "ethers";
+import { BigNumber, ethers, Signer } from "ethers";
 import {
   QueryClient,
   useMutation,
@@ -19,10 +19,16 @@ export const getCollectionFromAddress = async (
 ) => {
   try {
     const provider = new ethers.providers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_ALCHEMY_MUMBAI
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
     );
 
     const marketItem = new ethers.Contract(address, MarketItem.abi, provider);
+
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      provider
+    );
 
     // Getting collection information
     const nftCount = await marketItem.getNFTCount();
@@ -33,11 +39,19 @@ export const getCollectionFromAddress = async (
 
     const nftURI = await marketItem.tokenURI(nftId);
     const NFTData = await axios.get(nftURI);
-    const NFTOwner = await marketItem.ownerOf(nftId);
+    const nftStruct = await marketPlace.nfts(address, nftId);
+
+    const parsedNFTStruct = {
+      collectionAddress: nftStruct.collection,
+      owner: nftStruct.owner,
+      tokenID: nftStruct.tokenId.toString(),
+      price: ethers.utils.formatEther(nftStruct.price),
+      isForSale: nftStruct.isForSale,
+    };
 
     return {
       ...NFTData.data,
-      owner: NFTOwner,
+      ...parsedNFTStruct,
     };
   } catch (e) {
     console.error(e);
@@ -77,6 +91,93 @@ export const mintNFT = async (
     return mint;
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const putNFTForSale = async (
+  signer: Signer,
+  collectionAddress: string,
+  tokenId: string,
+  price: BigNumber
+) => {
+  if (!signer) return alert("Invalid signer");
+
+  try {
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      signer
+    );
+
+    const collectionContract = new ethers.Contract(
+      collectionAddress,
+      MarketItem.abi,
+      signer
+    );
+
+    console.log(collectionAddress, tokenId, price);
+
+
+    const approve = await collectionContract.approve(
+      MARKETPLACE_ADDRESS,
+      tokenId
+    );
+
+    await approve.wait();
+
+    console.log("Approved -----------------")
+
+      console.log(collectionAddress, tokenId, price);
+
+    const putForSale = await marketPlace.putNFTForSale(
+      collectionAddress,
+      tokenId,
+      price
+    );
+
+    await putForSale.wait();
+  } catch (e) {
+    console.error(e);
+    alert("Error putting NFT for sale");
+  }
+};
+
+export const removeNFTFromSale = async (
+  singer: Signer,
+  collectionAddress: string,
+  tokenId: string
+) => {
+  if (!singer) return alert("Invalid signer");
+
+  try {
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      singer
+    );
+
+    const collectionContract = new ethers.Contract(
+      collectionAddress,
+      MarketItem.abi,
+      singer
+    );
+
+    const removeApprovalForAll = await collectionContract.setApprovalForAll(
+      MARKETPLACE_ADDRESS,
+      false
+    );
+
+    await removeApprovalForAll.wait();
+
+    const remove = await marketPlace.removeNFTFromSale(
+      collectionAddress,
+      tokenId
+    );
+
+    await remove.wait();
+  } catch (e) {
+    console.error(e);
+    alert("Error removing NFT from sale");
   }
 };
 
@@ -121,6 +222,40 @@ export const useMintNFT = () => {
           "collectionsNFTs",
           data.collectionAddress,
         ]);
+      },
+    }
+  );
+};
+
+export const usePutNFTForSale = (
+  collectionAddress: string,
+  tokenId: string
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    (data: { signer: Signer; price: BigNumber }) =>
+      putNFTForSale(data.signer, collectionAddress, tokenId, data.price),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["NFT", collectionAddress, tokenId]);
+      },
+    }
+  );
+};
+
+export const useRemoveFromSale = (
+  signer: Signer,
+  collectionAddress: string,
+  tokenId: string
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    () => removeNFTFromSale(signer, collectionAddress, tokenId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["NFT", collectionAddress, tokenId]);
       },
     }
   );

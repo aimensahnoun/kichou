@@ -22,11 +22,17 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY as string],
       allowUnlimitedContractSize: true,
     },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts: [process.env.PRIVATE_KEY as string],
+      allowUnlimitedContractSize: true,
+    },
   },
   etherscan: {
     apiKey: {
       polygonMumbai: process.env.POLYSCAN || "",
       goerli: "FBMMMGPZIX2M236ZS6F8HEV6188FEBUFSQ",
+      fuji: process.env.SNOWTACE || "",
     },
   },
   solidity: {

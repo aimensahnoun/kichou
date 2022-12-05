@@ -16,7 +16,7 @@ export const getAllCollections = async () => {
   try {
     // Load contract from address ethers
     const provider = new ethers.providers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_ALCHEMY_MUMBAI
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
     );
 
     const marketItemFactory = new ethers.Contract(
@@ -36,7 +36,7 @@ export const getAllCollections = async () => {
 export const getCollectionFromAddress = async (address: string) => {
   try {
     const provider = new ethers.providers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_ALCHEMY_MUMBAI
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
     );
 
     const marketItem = new ethers.Contract(address, MarketItem.abi, provider);
@@ -74,10 +74,16 @@ export const getCollectionFromAddress = async (address: string) => {
 export const getAllCollectionsNfts = async (address: string) => {
   try {
     const provider = new ethers.providers.JsonRpcProvider(
-      process.env.NEXT_PUBLIC_ALCHEMY_MUMBAI
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
     );
 
     const marketItem = new ethers.Contract(address, MarketItem.abi, provider);
+
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      provider
+    );
 
     const nftCount = await marketItem.getNFTCount();
 
@@ -87,7 +93,17 @@ export const getAllCollectionsNfts = async (address: string) => {
       const nftURI = await marketItem.tokenURI(i);
       const NFTData = await axios.get(nftURI);
 
-      nfts.push(NFTData.data);
+      const nftStruct = await marketPlace.nfts(address, i);
+
+      const parsedNFTStruct = {
+        collectionAddress: nftStruct.collection,
+        owner: nftStruct.owner,
+        tokenID: nftStruct.tokenId.toString(),
+        price: ethers.utils.formatEther(nftStruct.price),
+        isForSale: nftStruct.isForSale,
+      };
+
+      nfts.push({ ...NFTData.data, ...parsedNFTStruct });
     }
 
     return nfts;

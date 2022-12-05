@@ -20,23 +20,54 @@ import {
   darkTheme,
   getDefaultWallets,
   RainbowKitProvider,
+  Chain
 } from '@rainbow-me/rainbowkit';
 import {
+
   chain,
   configureChains,
   createClient,
   WagmiConfig,
 } from 'wagmi';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
+import { infuraProvider } from "wagmi/providers/infura"
 import { publicProvider } from 'wagmi/providers/public';
 import NavBar from '../components/navbar'
 
 
 
+// const { chains, provider } = configureChains(
+//   [chain.polygonMumbai],
+//   [
+//     alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_INFURA_KEY! }),
+//     publicProvider()
+//   ]
+// );
+
+const fujiChain: Chain = {
+  id: 43113,
+  name: 'Avalanche FUJI C-Chain',
+  network: 'avalanche',
+  iconUrl: 'https://cryptologos.cc/logos/avalanche-avax-logo.svg?v=023',
+  iconBackground: '#fff',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Avalanche',
+    symbol: 'AVAX',
+  },
+  rpcUrls: {
+    default: 'https://api.avax-test.network/ext/bc/C/rpc',
+  },
+  blockExplorers: {
+    default: { name: 'SnowTrace', url: 'https://testnet.snowtrace.io/' },
+    etherscan: { name: 'SnowTrace', url: 'https://testnet.snowtrace.io/' },
+  },
+  testnet: true,
+};
+
 const { chains, provider } = configureChains(
-  [chain.polygonMumbai],
+  [fujiChain],
   [
-    alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY! }),
+    infuraProvider({ apiKey: process.env.NEXT_PUBLIC_INFURA_KEY! }),
     publicProvider()
   ]
 );
@@ -79,7 +110,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <meta property='og:url' content='https://www.kichou.xyz' />
           <meta property='og:type' content='website' />
           <meta property='og:title' content='Kichō' />
-          <meta property='og:description' content='Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders.' />
+          <meta property='og:description' content='Kichō is a NFT marketplace for the Avalanche network, The Marketplace of Wonders.' />
           <meta property='og:image' content='https://www.kichou.xyz/hero.png' />
           <meta property='og:image:width' content='1200' />
           <meta property='og:image:height' content='630' />
@@ -89,11 +120,11 @@ export default function App({ Component, pageProps }: AppProps) {
           <meta name='twitter:card' content='summary_large_image' />
           <meta name='twitter:creator' content='@aimensahnoun' />
           <meta name='twitter:title' content='Kichō' />
-          <meta name='twitter:description' content='Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders.' />
+          <meta name='twitter:description' content='Kichō is a NFT marketplace for the Avalanche network, The Marketplace of Wonders.' />
           <meta name='twitter:image' content='https://www.kichou.xyz/hero.png' />
           {/* Telegram meta */}
           <meta name="telegram:title" content="Kichō" />
-          <meta name="telegram:description" content="Kichō is a NFT marketplace for the Polygon network, The Marketplace of Wonders." />
+          <meta name="telegram:description" content="Kichō is a NFT marketplace for the Avalanche network, The Marketplace of Wonders." />
           <meta name="telegram:image" content="https://www.kichou.xyz/hero.png" />
           <meta name="telegram:image:alt" content="Kichō" />
           <meta name="telegram:creator" content="@aimensahnoun" />
@@ -130,6 +161,6 @@ export default function App({ Component, pageProps }: AppProps) {
         <ReactQueryDevtools />
       </RainbowKitProvider>
     </WagmiConfig>
-    
+
   </QueryClientProvider>
 }

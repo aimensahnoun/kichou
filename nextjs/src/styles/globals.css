@@ -30,3 +30,8 @@ a {
 * {
   box-sizing: border-box;
 }
+
+/* css class on hover */
+.text-shadow:hover {
+  text-shadow: 5px 5px 5px #fff;
+}

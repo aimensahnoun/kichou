@@ -185,7 +185,7 @@ export default function MintNFT() {
 
                 {/* Reciver Address */}
                 <div className='flex flex-col gap-y-4 mt-4'>
-                    <label htmlFor="collectionName">Reciver Address</label>
+                    <label htmlFor="collectionName">Receiver Address</label>
                     <input
                         onChange={(e) => {
                             setReceiverAddress(e.target.value)

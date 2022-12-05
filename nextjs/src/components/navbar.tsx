@@ -52,7 +52,8 @@ const NavBar = () => {
             <div className="flex items-center gap-x-4">
                 {
                     tabs.map((tab) => {
-                        return <Link key={tab.href} href={tab.href} className="text-kichou-gray duration-200 hover:text-white hover:shadow-lg hover:shadow-white/30" >
+                        return <Link key={tab.href} href={tab.href}
+                            className="text-kichou-gray duration-200 hover:text-white text-shadow" >
                             {tab.name}
                         </Link>
                     })

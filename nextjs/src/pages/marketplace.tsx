@@ -78,7 +78,7 @@ export default function Marketplace() {
                     <div className='grid gap-4 grid-cols-5 grid-rows-5'>
                         {
 
-                            collections!.map((collectionAddress: string, index: number) => {
+                            collections?.map((collectionAddress: string, index: number) => {
                                 return <Collection collectionAddress={collectionAddress} key={collectionAddress} />
                             })
                         }
