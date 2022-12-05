@@ -11,6 +11,7 @@ import axios from "axios";
 import { useEffect } from "react";
 import { MARKETPLACE_ADDRESS } from "../const/contracts/contractInfo";
 import { useSigner } from "wagmi";
+import { getAllCollectionsNfts } from "./collection";
 
 // Methods
 export const getCollectionFromAddress = async (
@@ -117,7 +118,6 @@ export const putNFTForSale = async (
 
     console.log(collectionAddress, tokenId, price);
 
-
     const approve = await collectionContract.approve(
       MARKETPLACE_ADDRESS,
       tokenId
@@ -125,9 +125,9 @@ export const putNFTForSale = async (
 
     await approve.wait();
 
-    console.log("Approved -----------------")
+    console.log("Approved -----------------");
 
-      console.log(collectionAddress, tokenId, price);
+    console.log(collectionAddress, tokenId, price);
 
     const putForSale = await marketPlace.putNFTForSale(
       collectionAddress,
@@ -161,13 +161,6 @@ export const removeNFTFromSale = async (
       MarketItem.abi,
       singer
     );
-
-    const removeApprovalForAll = await collectionContract.setApprovalForAll(
-      MARKETPLACE_ADDRESS,
-      false
-    );
-
-    await removeApprovalForAll.wait();
 
     const remove = await marketPlace.removeNFTFromSale(
       collectionAddress,
@@ -227,35 +220,67 @@ export const useMintNFT = () => {
   );
 };
 
-export const usePutNFTForSale = (
-  collectionAddress: string,
-  tokenId: string
-) => {
+export const usePutNFTForSale = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    (data: { signer: Signer; price: BigNumber }) =>
-      putNFTForSale(data.signer, collectionAddress, tokenId, data.price),
+    async (data: {
+      signer: Signer;
+      collectionAddress: string;
+      tokenId: string;
+      price: BigNumber;
+    }) =>
+      await putNFTForSale(
+        data.signer,
+        data.collectionAddress,
+        data.tokenId,
+        data.price
+      ),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["NFT", collectionAddress, tokenId]);
+      onSuccess: async (
+        data,
+        { signer, collectionAddress, tokenId, price },
+        context
+      ) => {
+        console.log("Invalidating queries: ", collectionAddress, tokenId);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
+        });
+        await queryClient.prefetchQuery({
+          queryKey: ["collectionsNFTs", collectionAddress],
+          queryFn: () => getAllCollectionsNfts(collectionAddress),
+        });
       },
     }
   );
 };
 
-export const useRemoveFromSale = (
-  signer: Signer,
-  collectionAddress: string,
-  tokenId: string
-) => {
+export const useRemoveFromSale = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    () => removeNFTFromSale(signer, collectionAddress, tokenId),
+    async (data: {
+      signer: Signer;
+      collectionAddress: string;
+      tokenId: string;
+    }) =>
+      await removeNFTFromSale(
+        data.signer,
+        data.collectionAddress,
+        data.tokenId
+      ),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["NFT", collectionAddress, tokenId]);
+      onSuccess: async (_, { signer, collectionAddress, tokenId }) => {
+        console.log("Invalidating queries: ", collectionAddress, tokenId);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
+        });
+        await queryClient.prefetchQuery({
+          queryKey: ["collectionsNFTs", collectionAddress],
+          queryFn: () => getAllCollectionsNfts(collectionAddress),
+        });
       },
     }
   );

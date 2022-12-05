@@ -22,6 +22,7 @@ import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollect
 import { useGetNFTById, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
 import { useState } from 'react';
 import { ethers } from 'ethers';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 export default function Collection() {
@@ -46,15 +47,10 @@ export default function Collection() {
     const { data: nftData, isLoading: loadingNFT } = useGetNFTById(id as string, parseInt(nftid! as string))
 
     const { mutateAsync: putForSale, isLoading: puttingForSale } = usePutNFTForSale(
-        id as string,
-        nftid as string,
-
     )
 
     const { mutateAsync: removeFromSale, isLoading: removingFromSale } = useRemoveFromSale(
-        signer!,
-        id as string,
-        nftid as string,
+
     )
 
     if (loadingNFT) return <div>Loading...</div>
@@ -172,9 +168,13 @@ export default function Collection() {
                                                     await putForSale(
                                                         {
                                                             signer: signer!,
+                                                            collectionAddress: id as string,
+                                                            tokenId: nftid! as string,
                                                             price: ethers.utils.parseEther(price)
                                                         }
                                                     )
+
+
                                                     setIsPuttingForSale(false)
 
                                                 }}
@@ -190,7 +190,13 @@ export default function Collection() {
                                 <Else>
                                     <div className='w-full flex items-center justify-start'>
                                         <button onClick={async () => {
-                                            await removeFromSale()
+                                            await removeFromSale(
+                                                {
+                                                    signer: signer!,
+                                                    collectionAddress: id as string,
+                                                    tokenId: nftid! as string,
+                                                }
+                                            )
                                         }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>{
                                                 removingFromSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Remove from sale'
                                             }</button>
