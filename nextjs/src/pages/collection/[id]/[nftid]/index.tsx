@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 
 // Depenedencies import
 import { BsImages } from 'react-icons/bs';
-import { AiOutlineUser } from 'react-icons/ai';
+import { AiOutlineUser, AiOutlineWallet } from 'react-icons/ai';
 import { useAtom } from 'jotai';
 // Custom components import
 
@@ -69,10 +69,18 @@ export default function Collection() {
                 </div>
 
                 <div className='flex items-center gap-x-2'>
-                    <AiOutlineUser className='text-xl' />
+                    <AiOutlineWallet className='text-xl' />
                     <span className='font-bold'>Owner:</span>
                     <div className='flex items-center gap-x-2'>
                         <span>{nftData?.owner}</span>
+                    </div>
+                </div>
+
+                <div className='flex items-center gap-x-2'>
+                    <AiOutlineUser className='text-xl' />
+                    <span className='font-bold'>Artist:</span>
+                    <div className='flex items-center gap-x-2'>
+                        <span>{nftData?.artist}</span>
                     </div>
                 </div>
                 <div className='mt-auto flex justify-start items-center justify-center'>
