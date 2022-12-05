@@ -24,7 +24,7 @@ const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
   
 
     if (isLoading) {
-        return <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
+        return <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
 
             <div className="w-full h-[80%] mb-2 relative bg-gray-500/20 animate-pulse" />
 
@@ -38,7 +38,7 @@ const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
     }
 
     return <Link href={`/collection/${collectionAddress}`}>
-        <div className="w-[14rem] h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
+        <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
 
             <div className="w-full h-full mb-2 relative">
                 <If condition={collection?.nftCount === 0}>

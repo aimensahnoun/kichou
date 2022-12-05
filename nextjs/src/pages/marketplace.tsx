@@ -75,7 +75,7 @@ export default function Marketplace() {
             <Else >
                 <div className='p-2 overflow-scroll w-full h-full'>
                     
-                    <div className='grid gap-4 grid-cols-5 grid-rows-5'>
+                    <div className='grid gap-4 grid-cols-1 grid-rows-1 lg:grid-cols-5 lg:grid-rows-5'>
                         {
 
                             collections?.map((collectionAddress: string, index: number) => {

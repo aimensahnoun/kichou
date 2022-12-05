@@ -73,11 +73,21 @@ export default function Collection() {
     return <main className='w-full flex p-6 gap-x-[5rem] items-center' style={{
         height: `calc(100vh - ${navbarHight}px)`,
     }}>
-        <div className='flex h-[75%] w-full   gap-x-[5rem]'>
+        <div className='flex h-[75%] w-full flex-col gap-y-6 lg:gap-y-0 lg:flex-row gap-x-[5rem]'>
             <img className='h-full w-[25rem] rounded-lg shadow-lg object-cover border-[1px] border-white/40' alt="NFT Image" src={nftData?.image} />
 
             <div className='flex flex-col gap-y-4'>
-                <span className='text-2xl font-bold'>{nftData?.name}</span>
+                <div className='flex items-center justify-between'>
+                    <span className='text-2xl font-bold'>{nftData?.name}</span>
+                    <If condition={nftData?.isForSale}>
+                        <Then>
+                            <div className='flex items-center gap-x-2'>
+                                <img src='/avalanche-logo.svg' className='w-5 h-5 object-cover' alt='Avalanche Logo' />
+                                <span>{nftData?.price} Avax</span>
+                            </div>
+                        </Then>
+                    </If>
+                </div>
                 <span>{nftData?.description}</span>
                 <div className='flex items-center gap-x-2'>
                     <span className='font-bold'>Edition:</span>
@@ -87,16 +97,18 @@ export default function Collection() {
 
                 <label className='font-bold'>Attributes: </label>
                 <div className='flex gap-2 gap-y-2 flex-wrap'>
-                    {nftData?.attributes.map((attribute: any , index : number) => <div key={index} className='flex items-center gap-x-2'>
+                    {nftData?.attributes.map((attribute: any, index: number) => <div key={index} className='flex items-center gap-x-2'>
                         <span className='p-2 rounded-lg bg-slate-400/40 font-bold'>{attribute.trait_type}</span>
                     </div>)}
                 </div>
 
-                <div className='flex items-center gap-x-2'>
-                    <AiOutlineWallet className='text-xl' />
-                    <span className='font-bold'>Owner:</span>
+                <div className='flex flex-col md:flex-col  gap-x-2'>
+                    <div className='flex gap-x-2 md:gap-0'>
+                        <AiOutlineWallet className='text-xl' />
+                        <span className='font-bold'>Owner:</span>
+                    </div>
                     <div className='flex items-center gap-x-2'>
-                        <span>{nftData?.owner}</span>
+                        <span className='text-sm md:text-base'>{nftData?.owner}</span>
                     </div>
                 </div>
 

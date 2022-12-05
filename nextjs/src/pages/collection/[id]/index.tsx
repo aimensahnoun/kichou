@@ -87,7 +87,7 @@ export default function Collection() {
             </div>
 
             <span className='text-2xl font-bold'>{collection?.name}</span>
-            <div className='flex items-center gap-x-4'>
+            <div className='flex flex-col justify-center-center gap-x-4'>
                 <div className='flex items-center gap-x-2'>
                     <BsImages className='text-lg' />
                     <span>{collection?.nftCount} NFTs</span>
@@ -95,7 +95,7 @@ export default function Collection() {
 
                 <div className='flex items-center gap-x-2'>
                     <AiOutlineUser className='text-lg' />
-                    <span>Created by: {collection?.owner}</span>
+                    <span>Created by: <span className='text-sm'>{collection?.owner}</span></span>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@ export default function Collection() {
                     </div>
                 </Then>
                 <Else>
-                    <div className='grid gap-4 grid-cols-5 grid-rows-5'>
+                    <div className='grid gap-4 grid-cols-1 grid-rows-1 lg:grid-cols-5 lg:grid-rows-5'>
                         {
                             allNfts?.map((nft: any, index: number) => {
                                 return <NFT key={index} nft={nft} collectionId={id as string} nftIndex={index + 1} />
