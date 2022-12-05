@@ -18,7 +18,7 @@ const NFT = ({ nft, collectionId, nftIndex }: { nft: any, collectionId: string, 
     usePrefetchNFTByID(collectionId, nftIndex)
 
     return <Link href={`/collection/${collectionId}/${nftIndex}`}>
-        <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
+        <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter relative">
 
             <div className="w-full h-full mb-2 relative">
                 <img src={nft?.image} alt="Collection First NFT" className="w-full h-full rounded-lg" />
