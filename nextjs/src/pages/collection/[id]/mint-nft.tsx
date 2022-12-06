@@ -208,7 +208,7 @@ export default function MintNFT() {
 
             {/* Preview */}
 
-            <aside className='hidden lg:w-[50%] border-[1px] rounded-lg border-white/40 relative'>
+            <aside className='hidden lg:block lg:w-[50%] border-[1px] rounded-lg border-white/40 relative'>
                 {nftImageURl.length > 0 && <img src={nftImageURl} className="w-full     h-full object-cover rounded-lg" alt="NFT-Image" />}
                 <div className='absolute p-4 z-10 bottom-0 left-0 bg-slate-400/20 rounded-lg backdrop-blur-sm h-fit w-full'>
                     <span className='text-xl font-bold'>{nftName}</span>
