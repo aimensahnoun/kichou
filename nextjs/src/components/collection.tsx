@@ -10,18 +10,21 @@ import { useEffect, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { ethers } from "ethers"
 import { Else, If, Then } from "react-if"
-import {motion} from "framer-motion"
+import { motion } from "framer-motion"
 
 
 // Constants import
-import { prefetchCollectionsNFTs, useGetCollectionFromAddress, usePrefetchCollectionsNFTs } from "../hooks/collection"
+import { prefetchCollectionsNFTsCount, useGetCollectionFromAddress, usePrefetchAllCollectionNFT, } from "../hooks/collection"
 
 const Collection = ({ collectionAddress }: { collectionAddress: string }) => {
 
     // React Query
     const { data: collection, isLoading, isFetched } = useGetCollectionFromAddress(collectionAddress)
-    usePrefetchCollectionsNFTs(collectionAddress)
-  
+    
+    usePrefetchAllCollectionNFT(collectionAddress)
+
+
+    usePrefetchAllCollectionNFT
 
     if (isLoading) {
         return <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">

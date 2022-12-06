@@ -10,6 +10,7 @@ import * as MarketItem from "../const/contracts/MarketItem.json";
 import axios from "axios";
 import { useEffect } from "react";
 import { MARKETPLACE_ADDRESS } from "../const/contracts/contractInfo";
+import { prefetchNFTByID } from "./nft";
 
 // Methods
 export const getAllCollections = async () => {
@@ -71,7 +72,7 @@ export const getCollectionFromAddress = async (address: string) => {
   }
 };
 
-export const getAllCollectionsNfts = async (address: string) => {
+export const getAllCollectionsNftsCount = async (address: string) => {
   try {
     const provider = new ethers.providers.JsonRpcProvider(
       process.env.NEXT_PUBLIC_ALCHEMY_FUJI
@@ -87,26 +88,28 @@ export const getAllCollectionsNfts = async (address: string) => {
 
     const nftCount = await marketItem.getNFTCount();
 
-    const nfts = [];
+    return [...Array(nftCount.toNumber())];
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const prefetchAllCollectionNFT = async (
+  queryClient: QueryClient,
+  address: string
+) => {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
+    );
+
+    const marketItem = new ethers.Contract(address, MarketItem.abi, provider);
+
+    const nftCount = await marketItem.getNFTCount();
 
     for (let i = 1; i <= nftCount.toNumber(); i++) {
-      const nftURI = await marketItem.tokenURI(i);
-      const NFTData = await axios.get(nftURI);
-
-      const nftStruct = await marketPlace.nfts(address, i);
-
-      const parsedNFTStruct = {
-        collectionAddress: nftStruct.collection,
-        owner: nftStruct.owner,
-        tokenID: nftStruct.tokenId.toString(),
-        price: ethers.utils.formatEther(nftStruct.price),
-        isForSale: nftStruct.isForSale,
-      };
-
-      nfts.push({ ...NFTData.data, ...parsedNFTStruct });
+      await prefetchNFTByID(queryClient, address, i);
     }
-
-    return nfts;
   } catch (e) {
     console.error(e);
   }
@@ -119,14 +122,14 @@ export const prefetchCollections = async (queryClient: QueryClient) => {
   });
 };
 
-export const prefetchCollectionsNFTs = async (
+export const prefetchCollectionsNFTsCount = async (
   queryClient: QueryClient,
   address: string
 ) => {
   try {
     await queryClient.prefetchQuery({
       queryKey: ["collectionsNFTs", address],
-      queryFn: () => getAllCollectionsNfts(address),
+      queryFn: () => getAllCollectionsNftsCount(address),
     });
   } catch (e) {
     console.error(e);
@@ -168,9 +171,9 @@ export const useGetCollectionFromAddress = (address: string) => {
   );
 };
 
-export const useGetAllCollectionsNfts = (address: string) => {
+export const useGetAllCollectionsNftsCount = (address: string) => {
   return useQuery(["collectionsNFTs", address], () =>
-    getAllCollectionsNfts(address)
+    getAllCollectionsNftsCount(address)
   );
 };
 
@@ -189,7 +192,7 @@ export const usePrefetchCollectionsNFTs = async (address: string) => {
 
   useEffect(() => {
     (async () => {
-      await prefetchCollectionsNFTs(queryClient, address);
+      await prefetchCollectionsNFTsCount(queryClient, address);
     })();
   }, []);
 };
@@ -206,4 +209,14 @@ export const useCreateCollection = (
       queryClient.invalidateQueries(["collections"]);
     },
   });
+};
+
+export const usePrefetchAllCollectionNFT = async (address: string) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    (async () => {
+      await prefetchAllCollectionNFT(queryClient, address);
+    })();
+  }, []);
 };

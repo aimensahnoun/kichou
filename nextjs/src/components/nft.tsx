@@ -8,14 +8,26 @@ import { Else, If, Then } from "react-if"
 
 
 // Constants import
-import { prefetchCollectionsNFTs, useGetCollectionFromAddress } from "../hooks/collection"
-import { usePrefetchNFTByID } from "../hooks/nft"
+import { prefetchCollectionsNFTsCount, useGetCollectionFromAddress } from "../hooks/collection"
+import { useGetNFTById, usePrefetchNFTByID } from "../hooks/nft"
 
-const NFT = ({ nft, collectionId, nftIndex }: { nft: any, collectionId: string, nftIndex: number }) => {
+const NFT = ({ collectionId, nftIndex }: {  collectionId: string, nftIndex: number }) => {
+
+    const { data: nft, isLoading: loadingNFT } = useGetNFTById(collectionId as string, nftIndex)
 
 
     // React Query
     usePrefetchNFTByID(collectionId, nftIndex)
+
+    if (loadingNFT) {
+        return <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
+
+            <div className="w-full h-[80%] mb-2 relative bg-gray-500/20 animate-pulse" />
+
+            <div className="bg-gray-500/20 w-full h-[10%] rounded-xl animate-pulse " />
+
+        </div>
+    }
 
     return <Link href={`/collection/${collectionId}/${nftIndex}`}>
         <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter relative">

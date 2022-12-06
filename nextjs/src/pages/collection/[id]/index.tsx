@@ -14,7 +14,7 @@ import { useAccount } from 'wagmi';
 import { navbarHightAtom } from "../../../utils/global-state"
 
 // Hooks import
-import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollections } from '../../../hooks/collection';
+import { useGetAllCollectionsNftsCount, useGetCollectionFromAddress, useGetNFTCollections } from '../../../hooks/collection';
 import { Else, If, Then } from 'react-if';
 import NFT from '../../../components/nft';
 
@@ -34,7 +34,7 @@ export default function Collection() {
     // React Query
     const { data: allCollections, isLoading: areCollectionsLoading, isFetched: areCollectionsFetched } = useGetNFTCollections()
     const { data: collection, isLoading: isLoadingCollection, isFetched } = useGetCollectionFromAddress(id as string)
-    const { data: allNfts, isLoading: isLoadingNFTS } = useGetAllCollectionsNfts(id as string)
+    const { data: allNfts, isLoading: isLoadingNFTS } = useGetAllCollectionsNftsCount(id as string)
 
     // If the collection is not found, redirect to the 404 page
     if (areCollectionsFetched && (allCollections.length === 0 || allCollections.filter((collection: string) => collection === id).length === 0)) {
@@ -124,7 +124,7 @@ export default function Collection() {
                     <div className='grid gap-4 grid-cols-1 grid-rows-1 lg:grid-cols-5 lg:grid-rows-5'>
                         {
                             allNfts?.map((nft: any, index: number) => {
-                                return <NFT key={index} nft={nft} collectionId={id as string} nftIndex={index + 1} />
+                                return <NFT key={index} collectionId={id as string} nftIndex={index + 1} />
                             })
                         }
                     </div>
