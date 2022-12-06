@@ -33,7 +33,9 @@ export default function Collection() {
 
     // React Query
     const { data: allCollections, isLoading: areCollectionsLoading, isFetched: areCollectionsFetched } = useGetNFTCollections()
+
     const { data: collection, isLoading: isLoadingCollection, isFetched } = useGetCollectionFromAddress(id as string)
+    
     const { data: allNfts, isLoading: isLoadingNFTS } = useGetAllCollectionsNftsCount(id as string)
 
     // If the collection is not found, redirect to the 404 page

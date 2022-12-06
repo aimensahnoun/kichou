@@ -247,10 +247,6 @@ export const usePutNFTForSale = () => {
         await queryClient.invalidateQueries({
           queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
         });
-        await queryClient.prefetchQuery({
-          queryKey: ["collectionsNFTs", collectionAddress],
-          queryFn: () => getAllCollectionsNfts(collectionAddress),
-        });
       },
     }
   );
@@ -276,10 +272,6 @@ export const useRemoveFromSale = () => {
 
         await queryClient.invalidateQueries({
           queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
-        });
-        await queryClient.prefetchQuery({
-          queryKey: ["collectionsNFTs", collectionAddress],
-          queryFn: () => getAllCollectionsNfts(collectionAddress),
         });
       },
     }
