@@ -18,7 +18,7 @@ import NFT from '../../../../components/nft';
 import { navbarHightAtom } from "../../../../utils/global-state"
 
 // Hooks import
-import { useGetAllCollectionsNfts, useGetCollectionFromAddress, useGetNFTCollections } from '../../../../hooks/collection';
+import {  useGetCollectionFromAddress, useGetNFTCollections } from '../../../../hooks/collection';
 import { useGetNFTById, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
 import { useState } from 'react';
 import { ethers } from 'ethers';

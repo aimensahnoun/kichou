@@ -11,7 +11,7 @@ import axios from "axios";
 import { useEffect } from "react";
 import { MARKETPLACE_ADDRESS } from "../const/contracts/contractInfo";
 import { useSigner } from "wagmi";
-import { getAllCollectionsNfts } from "./collection";
+
 
 // Methods
 export const getCollectionFromAddress = async (
