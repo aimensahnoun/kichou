@@ -13,6 +13,7 @@ import { useAtom } from "jotai"
 // Utils import
 import { navbarHightAtom } from "../utils/global-state"
 import Link from "next/link"
+import { useAccount } from "wagmi"
 
 const NavBar = () => {
 
@@ -22,17 +23,30 @@ const NavBar = () => {
     // Ref
     const navbarRef = useRef<HTMLDivElement>(null)
 
+    // Wagmi 
+    const { isConnected , address } = useAccount()
+
     // UseEffects
     useEffect(() => {
         const height = navbarRef.current?.clientHeight;
         if (height) setNavbarHight(height)
     }, [navbarRef.current])
 
+
+
     // Constants
     const tabs = [
         {
             name: "Marketplace",
-            href: "/marketplace"
+            href: "/marketplace",
+        },
+        {
+            name: "My NFTs",
+            href: `/${address}`,
+        },
+        {
+            name: "Offers",
+            href: "/offers",
         },
     ]
 
@@ -53,7 +67,7 @@ const NavBar = () => {
                 {
                     tabs.map((tab) => {
                         return <Link key={tab.href} href={tab.href}
-                            className="text-kichou-gray duration-200 hover:text-white text-shadow" >
+                            className={"text-kichou-gray duration-200 hover:text-white text-shadow"} >
                             {tab.name}
                         </Link>
                     })

@@ -17,6 +17,7 @@ import { navbarHightAtom } from "../../../utils/global-state"
 import { useGetAllCollectionsNftsCount, useGetCollectionFromAddress, useGetNFTCollections } from '../../../hooks/collection';
 import { Else, If, Then } from 'react-if';
 import NFT from '../../../components/nft';
+import Link from 'next/link';
 
 
 export default function Collection() {
@@ -35,7 +36,6 @@ export default function Collection() {
     const { data: allCollections, isLoading: areCollectionsLoading, isFetched: areCollectionsFetched } = useGetNFTCollections()
 
     const { data: collection, isLoading: isLoadingCollection, isFetched } = useGetCollectionFromAddress(id as string)
-    
     const { data: allNfts, isLoading: isLoadingNFTS } = useGetAllCollectionsNftsCount(id as string)
 
     // If the collection is not found, redirect to the 404 page
@@ -97,7 +97,12 @@ export default function Collection() {
 
                 <div className='flex items-center gap-x-2'>
                     <AiOutlineUser className='text-lg' />
-                    <span>Created by: <span className='text-sm'>{collection?.owner}</span></span>
+                    <div className='flex items-center gap-x-2'>
+                        <span>Created by: </span>
+                        <Link href={`/${collection?.owner}`}>
+                            <span className='text-sm'>{collection?.owner}</span>
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

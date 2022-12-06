@@ -201,6 +201,36 @@ export const buyNFT = async (
   }
 };
 
+export const getOwnerNFTs = async (walletAddress: string) => {
+  if (!walletAddress) return [];
+
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
+    );
+
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      provider
+    );
+
+    const userNFTs = await marketPlace.ownerToNFTs(walletAddress);
+
+    const parsedNFTs = userNFTs.map((nft : any) => ({
+      collectionAddress: nft.collection,
+      owner: nft.owner,
+      tokenID: nft.tokenId.toString(),
+      price: ethers.utils.formatEther(nft.price),
+      isForSale: nft.isForSale,
+    }));
+
+    return parsedNFTs;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 // Hooks
 export const useGetNFTById = (collectionAddress: string, NFTId: number) => {
   return useQuery(["NFT", collectionAddress, NFTId], () =>
@@ -331,5 +361,11 @@ export const useBuyNFT = () => {
         });
       },
     }
+  );
+};
+
+export const useGetOwnerNFTs = (walletAddress: string) => {
+  return useQuery(["userNFTs", walletAddress], () =>
+    getOwnerNFTs(walletAddress)
   );
 };

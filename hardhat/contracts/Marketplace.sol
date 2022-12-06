@@ -51,13 +51,13 @@ contract MarketPlace is Ownable {
     mapping(address => address[]) public userToOwnedCollections;
     mapping(address => mapping(address => bool))
         public doesUserOwnNFTInCollection;
-    mapping(address => mapping(address => uint[])) public ownerToNFTs;
+    mapping(address => NFT[]) private _ownerToNFTs;
     mapping(address => mapping(uint256 => NFT)) public nfts;
     mapping(address => mapping(uint256 => Offers[])) public nftToOffers;
 
     // A way to track if a user has made an offer on a specific NFT
-    mapping(address => mapping(string => bool)) public hasUserMadeOfferOnNFT;
-    mapping(address => mapping(string => uint256)) public userNFTOFferIndex;
+    mapping(address => mapping(string => bool)) private _hasUserMadeOfferOnNFT;
+    mapping(address => mapping(string => uint256)) private userNFTOFferIndex;
 
     address[] public collections;
 
@@ -143,7 +143,15 @@ contract MarketPlace is Ownable {
             doesUserOwnNFTInCollection[_to][_collection] = true;
         }
 
-        ownerToNFTs[_to][_collection].push(tokenId);
+        _ownerToNFTs[_to].push(
+            NFT({
+                collection: _collection,
+                owner: _to,
+                tokenId: tokenId,
+                price: 0,
+                isForSale: false
+            })
+        );
         _totalNFTCounter.increment();
     }
 
@@ -151,13 +159,6 @@ contract MarketPlace is Ownable {
         address _owner
     ) external view returns (address[] memory) {
         return (userToOwnedCollections[_owner]);
-    }
-
-    function getNFTsByUserAndCollection(
-        address _owner,
-        address _collection
-    ) external view returns (uint256[] memory) {
-        return ownerToNFTs[_owner][_collection];
     }
 
     function totalNFTCount() external view returns (uint256) {
@@ -199,9 +200,8 @@ contract MarketPlace is Ownable {
 
         nfts[_collection][_tokenId].price = 0;
         nfts[_collection][_tokenId].isForSale = false;
-
     }
-    
+
     // NFT Buyer Methods
     function makeOfferForNFT(
         address _collection,
@@ -221,7 +221,7 @@ contract MarketPlace is Ownable {
             Offers({buyer: msg.sender, price: msg.value})
         );
 
-        hasUserMadeOfferOnNFT[msg.sender][
+        _hasUserMadeOfferOnNFT[msg.sender][
             string(abi.encodePacked(_collection, _tokenId))
         ] = true;
 
@@ -241,7 +241,7 @@ contract MarketPlace is Ownable {
         }
 
         if (
-            !hasUserMadeOfferOnNFT[msg.sender][
+            !_hasUserMadeOfferOnNFT[msg.sender][
                 string(abi.encodePacked(_collection, _tokenId))
             ]
         ) {
@@ -265,7 +265,7 @@ contract MarketPlace is Ownable {
 
         delete nftToOffers[_collection][_tokenId][offersLength - 1];
 
-        hasUserMadeOfferOnNFT[msg.sender][
+        _hasUserMadeOfferOnNFT[msg.sender][
             string(abi.encodePacked(_collection, _tokenId))
         ] = false;
 
@@ -284,7 +284,7 @@ contract MarketPlace is Ownable {
         }
 
         if (
-            !hasUserMadeOfferOnNFT[_buyer][
+            !_hasUserMadeOfferOnNFT[_buyer][
                 string(abi.encodePacked(_collection, _tokenId))
             ]
         ) {
@@ -312,7 +312,7 @@ contract MarketPlace is Ownable {
 
         delete nftToOffers[_collection][_tokenId][offersLength - 1];
 
-        hasUserMadeOfferOnNFT[_buyer][
+        _hasUserMadeOfferOnNFT[_buyer][
             string(abi.encodePacked(_collection, _tokenId))
         ] = false;
 
@@ -335,7 +335,7 @@ contract MarketPlace is Ownable {
         }
 
         if (
-            !hasUserMadeOfferOnNFT[_buyer][
+            !_hasUserMadeOfferOnNFT[_buyer][
                 string(abi.encodePacked(_collection, _tokenId))
             ]
         ) {
@@ -359,17 +359,14 @@ contract MarketPlace is Ownable {
 
         delete nftToOffers[_collection][_tokenId][offersLength - 1];
 
-        hasUserMadeOfferOnNFT[_buyer][
+        _hasUserMadeOfferOnNFT[_buyer][
             string(abi.encodePacked(_collection, _tokenId))
         ] = false;
 
         payable(_buyer).transfer(offer.price);
     }
 
-    function buyNFT(
-        address _collection,
-        uint256 _tokenId
-    ) external payable {
+    function buyNFT(address _collection, uint256 _tokenId) external payable {
         MarketItem marketItem = MarketItem(_collection);
 
         if (marketItem.ownerOf(_tokenId) == msg.sender) {
@@ -405,6 +402,20 @@ contract MarketPlace is Ownable {
         payable(oldOwner).transfer(msg.value - marketPlaceFee);
     }
 
+    function hasUserMadeOfferOnNFT(
+        address _user,
+        address _collection,
+        uint256 _tokenId
+    ) external view returns (bool) {
+        return
+            _hasUserMadeOfferOnNFT[_user][
+                string(abi.encodePacked(_collection, _tokenId))
+            ];
+    }
+
+    function ownerToNFTs(address _owner) external view returns (NFT[] memory) {
+        return _ownerToNFTs[_owner];
+    }
 
     // MarketPlace Owner Methods
     function withdrawMarketPlaceProfit() external onlyOwner {

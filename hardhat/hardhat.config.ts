@@ -32,8 +32,18 @@ const config: HardhatUserConfig = {
     apiKey: {
       polygonMumbai: process.env.POLYSCAN || "",
       goerli: "FBMMMGPZIX2M236ZS6F8HEV6188FEBUFSQ",
-      fuji: process.env.SNOWTACE || "",
+      fuji: process.env.SNOWTRACE || "",
     },
+    customChains: [
+      {
+        network: "fuji",
+        chainId: 43113,
+        urls: {
+          apiURL: "https://api-testnet.snowtrace.io/api",
+          browserURL: "https://testnet.snowtrace.io",
+        },
+      },
+    ],
   },
   solidity: {
     version: "0.8.17",

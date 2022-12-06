@@ -23,12 +23,14 @@ import { useBuyNFT, useGetNFTById, usePutNFTForSale, useRemoveFromSale } from '.
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useQueryClient } from '@tanstack/react-query';
+import Link from 'next/link';
 
 
 export default function Collection() {
 
     // Local state
     const [isPuttingForSale, setIsPuttingForSale] = useState(false);
+    const [isMakingOffer, setIsMakingOffer] = useState(false);
     const [price, setPrice] = useState<string>("");
 
     // Global state
@@ -105,7 +107,9 @@ export default function Collection() {
                         <span className='font-bold'>Owner:</span>
                     </div>
                     <div className='flex items-center gap-x-2'>
+                        <Link href={`/${nftData?.owner}`}>
                         <span className='text-sm md:text-base'>{nftData?.owner}</span>
+                        </Link>
                     </div>
                 </div>
 
@@ -218,7 +222,7 @@ export default function Collection() {
                                                             signer: signer!,
                                                             collectionAddress: id as string,
                                                             tokenId: nftid! as string,
-                                                            
+
                                                             price: nftData?.price
                                                         })
 
@@ -228,7 +232,65 @@ export default function Collection() {
 
                                             </div>
                                         </Then>
+                                        <Else>
+                                            <div className='flex flex-col items-start mt-auto'>
+                                                <button
+                                                onClick={() => setIsMakingOffer(true)}
+                                                    className='p-2 rounded-lg bg-slate-400/40 font-bold'>Make an Offer</button>
+                                                <AnimatePresence>
+                                                    {isMakingOffer && <motion.div
 
+                                                        initial={{ opacity: 0, width: 0 }}
+                                                        animate={{
+                                                            opacity: 1, y: 0, width: '100%',
+                                                            transition: {
+                                                                duration: 0.2,
+                                                                ease: "easeOut",
+                                                            }
+                                                        }}
+
+                                                        exit={{
+                                                            opacity: 0, y: 0, width: 0,
+                                                            transition: {
+                                                                duration: 0.2,
+                                                                ease: "easeOut",
+                                                            }
+                                                        }}
+
+                                                        className='flex items-center mt-4 gap-x-2'>
+                                                        {/* Price inpurt */}
+                                                        <input
+                                                            onChange={(e) => {
+                                                                if (parseFloat(e.target.value) < 0) {
+                                                                    e.target.value = Math.abs(parseFloat(e.target.value)).toString()
+                                                                }
+
+                                                                setPrice(e.target.value)
+                                                            }}
+                                                            className='p-2 rounded-lg bg-slate-400/40 font-bold' type="number" placeholder='5 Avax' />
+                                                        <button onClick={() => {
+                                                            setIsMakingOffer(false)
+                                                        }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>X</button>
+
+                                                        <button
+
+                                                            disabled={!canPutForSale()}
+                                                            onClick={async () => {
+                                                               
+
+                                                                setIsMakingOffer(false)
+
+                                                            }}
+                                                            className={`p-2 rounded-lg bg-slate-400/40 font-bold  
+                                        ${!canPutForSale() && 'bg-slate-400/20 cursor-not-allowed'}`}>{
+                                                                puttingForSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Submit'
+                                                            }</button>
+
+
+                                                    </motion.div>}
+                                                </AnimatePresence>
+                                            </div>
+                                        </Else>
                                     </If>
                                 </Else>
                             </If>
