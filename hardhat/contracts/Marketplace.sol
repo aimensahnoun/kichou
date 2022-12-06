@@ -201,7 +201,7 @@ contract MarketPlace is Ownable {
         nfts[_collection][_tokenId].isForSale = false;
 
     }
-
+    
     // NFT Buyer Methods
     function makeOfferForNFT(
         address _collection,
@@ -368,8 +368,7 @@ contract MarketPlace is Ownable {
 
     function buyNFT(
         address _collection,
-        uint256 _tokenId,
-        address _to
+        uint256 _tokenId
     ) external payable {
         MarketItem marketItem = MarketItem(_collection);
 
@@ -393,9 +392,9 @@ contract MarketPlace is Ownable {
 
         address oldOwner = marketItem.ownerOf(_tokenId);
 
-        marketItem.safeTransferFrom(msg.sender, _to, _tokenId);
+        marketItem.safeTransferFrom(oldOwner, msg.sender, _tokenId);
 
-        nfts[_collection][_tokenId].owner = _to;
+        nfts[_collection][_tokenId].owner = msg.sender;
         nfts[_collection][_tokenId].price = msg.value;
         nfts[_collection][_tokenId].isForSale = false;
 
@@ -405,6 +404,7 @@ contract MarketPlace is Ownable {
 
         payable(oldOwner).transfer(msg.value - marketPlaceFee);
     }
+
 
     // MarketPlace Owner Methods
     function withdrawMarketPlaceProfit() external onlyOwner {

@@ -18,8 +18,8 @@ import NFT from '../../../../components/nft';
 import { navbarHightAtom } from "../../../../utils/global-state"
 
 // Hooks import
-import {  useGetCollectionFromAddress, useGetNFTCollections } from '../../../../hooks/collection';
-import { useGetNFTById, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
+import { useGetCollectionFromAddress, useGetNFTCollections } from '../../../../hooks/collection';
+import { useBuyNFT, useGetNFTById, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useQueryClient } from '@tanstack/react-query';
@@ -35,7 +35,7 @@ export default function Collection() {
     const [navbarHight] = useAtom(navbarHightAtom);
 
     // Wagmi hooks
-    const { address } = useAccount()
+    const { address, isConnected } = useAccount()
     const { data: signer } = useSigner()
 
     // Router
@@ -50,8 +50,9 @@ export default function Collection() {
     )
 
     const { mutateAsync: removeFromSale, isLoading: removingFromSale } = useRemoveFromSale(
-
     )
+
+    const { mutateAsync: buyNFT, isLoading: buyingNFT } = useBuyNFT()
 
     if (loadingNFT) return <div>Loading...</div>
 
@@ -116,101 +117,128 @@ export default function Collection() {
                     </div>
                 </div>
                 <div className='mt-auto flex-col justify-start items-center'>
-                    <If condition={address == nftData?.owner}>
-                        <Then >
-                            <If condition={!nftData?.isForSale}>
+                    <If condition={isConnected}>
+                        <Then>
+                            <If condition={address == nftData?.owner}>
+                                <Then >
+                                    <If condition={!nftData?.isForSale}>
 
-                                <Then>
-                                    <div className='w-full flex items-center justify-start'>
-                                        <button onClick={() => setIsPuttingForSale(true)} className='p-2 rounded-lg bg-slate-400/40 font-bold'>Put for sale</button>
-                                    </div>
+                                        <Then>
+                                            <div className='w-full flex items-center justify-start'>
+                                                <button onClick={() => setIsPuttingForSale(true)} className='p-2 rounded-lg bg-slate-400/40 font-bold'>Put for sale</button>
+                                            </div>
 
 
-                                    <AnimatePresence>
-                                        {isPuttingForSale && <motion.div
+                                            <AnimatePresence>
+                                                {isPuttingForSale && <motion.div
 
-                                            initial={{ opacity: 0, width: 0 }}
-                                            animate={{
-                                                opacity: 1, y: 0, width: '100%',
-                                                transition: {
-                                                    duration: 0.2,
-                                                    ease: "easeOut",
-                                                }
-                                            }}
+                                                    initial={{ opacity: 0, width: 0 }}
+                                                    animate={{
+                                                        opacity: 1, y: 0, width: '100%',
+                                                        transition: {
+                                                            duration: 0.2,
+                                                            ease: "easeOut",
+                                                        }
+                                                    }}
 
-                                            exit={{
-                                                opacity: 0, y: 0, width: 0,
-                                                transition: {
-                                                    duration: 0.2,
-                                                    ease: "easeOut",
-                                                }
-                                            }}
+                                                    exit={{
+                                                        opacity: 0, y: 0, width: 0,
+                                                        transition: {
+                                                            duration: 0.2,
+                                                            ease: "easeOut",
+                                                        }
+                                                    }}
 
-                                            className='flex items-center mt-4 gap-x-2'>
-                                            {/* Price inpurt */}
-                                            <input
-                                                onChange={(e) => {
-                                                    if (parseFloat(e.target.value) < 0) {
-                                                        e.target.value = Math.abs(parseFloat(e.target.value)).toString()
-                                                    }
+                                                    className='flex items-center mt-4 gap-x-2'>
+                                                    {/* Price inpurt */}
+                                                    <input
+                                                        onChange={(e) => {
+                                                            if (parseFloat(e.target.value) < 0) {
+                                                                e.target.value = Math.abs(parseFloat(e.target.value)).toString()
+                                                            }
 
-                                                    setPrice(e.target.value)
-                                                }}
-                                                className='p-2 rounded-lg bg-slate-400/40 font-bold' type="number" placeholder='5 Avax' />
-                                            <button onClick={() => {
-                                                setIsPuttingForSale(false)
-                                            }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>X</button>
+                                                            setPrice(e.target.value)
+                                                        }}
+                                                        className='p-2 rounded-lg bg-slate-400/40 font-bold' type="number" placeholder='5 Avax' />
+                                                    <button onClick={() => {
+                                                        setIsPuttingForSale(false)
+                                                    }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>X</button>
 
-                                            <button
+                                                    <button
 
-                                                disabled={!canPutForSale()}
-                                                onClick={async () => {
-                                                    await putForSale(
+                                                        disabled={!canPutForSale()}
+                                                        onClick={async () => {
+                                                            await putForSale(
+                                                                {
+                                                                    signer: signer!,
+                                                                    collectionAddress: id as string,
+                                                                    tokenId: nftid! as string,
+                                                                    price: ethers.utils.parseEther(price)
+                                                                }
+                                                            )
+
+
+                                                            setIsPuttingForSale(false)
+
+                                                        }}
+                                                        className={`p-2 rounded-lg bg-slate-400/40 font-bold  
+                                        ${!canPutForSale() && 'bg-slate-400/20 cursor-not-allowed'}`}>{
+                                                            puttingForSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Put for sale'
+                                                        }</button>
+
+
+                                                </motion.div>}
+                                            </AnimatePresence>
+                                        </Then>
+                                        <Else>
+                                            <div className='w-full flex items-center justify-start'>
+                                                <button onClick={async () => {
+                                                    await removeFromSale(
                                                         {
                                                             signer: signer!,
                                                             collectionAddress: id as string,
                                                             tokenId: nftid! as string,
-                                                            price: ethers.utils.parseEther(price)
                                                         }
                                                     )
+                                                }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>{
+                                                        removingFromSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Remove from sale'
+                                                    }</button>
+                                            </div>
+                                        </Else>
+                                    </If>
 
-
-                                                    setIsPuttingForSale(false)
-
-                                                }}
-                                                className={`p-2 rounded-lg bg-slate-400/40 font-bold  
-                                        ${!canPutForSale() && 'bg-slate-400/20 cursor-not-allowed'}`}>{
-                                                    puttingForSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Put for sale'
-                                                }</button>
-
-
-                                        </motion.div>}
-                                    </AnimatePresence>
                                 </Then>
                                 <Else>
-                                    <div className='w-full flex items-center justify-start'>
-                                        <button onClick={async () => {
-                                            await removeFromSale(
-                                                {
-                                                    signer: signer!,
-                                                    collectionAddress: id as string,
-                                                    tokenId: nftid! as string,
-                                                }
-                                            )
-                                        }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>{
-                                                removingFromSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Remove from sale'
-                                            }</button>
-                                    </div>
+                                    <If condition={nftData?.isForSale}>
+                                        <Then>
+                                            <div className='flex items-center mt-auto'>
+                                                <button
+                                                    onClick={async () => {
+                                                        await buyNFT({
+                                                            signer: signer!,
+                                                            collectionAddress: id as string,
+                                                            tokenId: nftid! as string,
+                                                            
+                                                            price: nftData?.price
+                                                        })
+
+                                                    }}
+                                                    className='p-2 rounded-lg bg-slate-400/40 font-bold'>{buyingNFT ?
+                                                        <AiOutlineLoading3Quarters className='animate-spin' /> : 'Buy NFT'}</button>
+
+                                            </div>
+                                        </Then>
+
+                                    </If>
                                 </Else>
                             </If>
-
                         </Then>
                     </If>
                 </div>
             </div>
 
 
-        </div>
-    </main>
+        </div >
+    </main >
 }
 

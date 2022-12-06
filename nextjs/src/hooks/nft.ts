@@ -11,7 +11,7 @@ import axios from "axios";
 import { useEffect } from "react";
 import { MARKETPLACE_ADDRESS } from "../const/contracts/contractInfo";
 import { useSigner } from "wagmi";
-
+import { ifError } from "assert";
 
 // Methods
 export const getCollectionFromAddress = async (
@@ -174,6 +174,33 @@ export const removeNFTFromSale = async (
   }
 };
 
+export const buyNFT = async (
+  signer: Signer,
+  collectionAddress: string,
+  tokenId: string,
+  price: BigNumber
+) => {
+  if (!signer) return alert("Invalid signer");
+
+  const marketPalce = new ethers.Contract(
+    MARKETPLACE_ADDRESS,
+    MarketItemFactory.abi,
+    signer
+  );
+
+  const buyNFT = await marketPalce.buyNFT(collectionAddress, tokenId, {
+    value: ethers.utils.parseEther(price.toString()),
+  });
+
+  await buyNFT.wait();
+
+  try {
+  } catch (e) {
+    console.error(e);
+    alert("Error buying NFT");
+  }
+};
+
 // Hooks
 export const useGetNFTById = (collectionAddress: string, NFTId: number) => {
   return useQuery(["NFT", collectionAddress, NFTId], () =>
@@ -268,6 +295,35 @@ export const useRemoveFromSale = () => {
       ),
     {
       onSuccess: async (_, { signer, collectionAddress, tokenId }) => {
+        console.log("Invalidating queries: ", collectionAddress, tokenId);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
+        });
+      },
+    }
+  );
+};
+
+export const useBuyNFT = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: {
+      signer: Signer;
+      collectionAddress: string;
+      tokenId: string;
+      price: BigNumber;
+    }) =>
+      await buyNFT(
+        data.signer,
+        data.collectionAddress,
+        data.tokenId,
+        data.price
+      ),
+
+    {
+      onSuccess: async (_, { collectionAddress, tokenId }) => {
         console.log("Invalidating queries: ", collectionAddress, tokenId);
 
         await queryClient.invalidateQueries({
