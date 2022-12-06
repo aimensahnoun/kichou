@@ -19,7 +19,7 @@ import { navbarHightAtom } from "../../../../utils/global-state"
 
 // Hooks import
 import { useGetCollectionFromAddress, useGetNFTCollections } from '../../../../hooks/collection';
-import { useBuyNFT, useGetNFTById, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
+import { useBuyNFT, useGetNFTById, useHasMadeOfferToNFT, useMakeOfferToNFT, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useQueryClient } from '@tanstack/react-query';
@@ -48,6 +48,8 @@ export default function Collection() {
     //  React Query
     const { data: nftData, isLoading: loadingNFT } = useGetNFTById(id as string, parseInt(nftid! as string))
 
+    const { data: hasMadeOffer, isLoading: loadingOffer } = useHasMadeOfferToNFT(address as string, id as string, nftid as string)
+
     const { mutateAsync: putForSale, isLoading: puttingForSale } = usePutNFTForSale(
     )
 
@@ -56,7 +58,9 @@ export default function Collection() {
 
     const { mutateAsync: buyNFT, isLoading: buyingNFT } = useBuyNFT()
 
-    if (loadingNFT) return <div>Loading...</div>
+    const { mutateAsync: makeOffer, isLoading: makingOffer } = useMakeOfferToNFT()
+
+    if (loadingNFT || loadingOffer) return <div>Loading...</div>
 
     if (!loadingNFT && nftData == null && id !== undefined && nftid !== undefined) {
         router.replace("/404")
@@ -66,6 +70,10 @@ export default function Collection() {
     // Methods
     const canPutForSale = () => {
         return nftData?.owner === address && !nftData?.isForSale && !puttingForSale && parseFloat(price) > 0 && id !== undefined && nftid !== undefined
+    }
+
+    const canMakeOffer = () => {
+        return nftData?.owner !== address && !hasMadeOffer && !makingOffer && parseFloat(price) > 0 && id !== undefined && nftid !== undefined
     }
 
 
@@ -108,7 +116,7 @@ export default function Collection() {
                     </div>
                     <div className='flex items-center gap-x-2'>
                         <Link href={`/${nftData?.owner}`}>
-                        <span className='text-sm md:text-base'>{nftData?.owner}</span>
+                            <span className='text-sm md:text-base'>{nftData?.owner}</span>
                         </Link>
                     </div>
                 </div>
@@ -233,63 +241,82 @@ export default function Collection() {
                                             </div>
                                         </Then>
                                         <Else>
-                                            <div className='flex flex-col items-start mt-auto'>
-                                                <button
-                                                onClick={() => setIsMakingOffer(true)}
-                                                    className='p-2 rounded-lg bg-slate-400/40 font-bold'>Make an Offer</button>
-                                                <AnimatePresence>
-                                                    {isMakingOffer && <motion.div
-
-                                                        initial={{ opacity: 0, width: 0 }}
-                                                        animate={{
-                                                            opacity: 1, y: 0, width: '100%',
-                                                            transition: {
-                                                                duration: 0.2,
-                                                                ease: "easeOut",
-                                                            }
-                                                        }}
-
-                                                        exit={{
-                                                            opacity: 0, y: 0, width: 0,
-                                                            transition: {
-                                                                duration: 0.2,
-                                                                ease: "easeOut",
-                                                            }
-                                                        }}
-
-                                                        className='flex items-center mt-4 gap-x-2'>
-                                                        {/* Price inpurt */}
-                                                        <input
-                                                            onChange={(e) => {
-                                                                if (parseFloat(e.target.value) < 0) {
-                                                                    e.target.value = Math.abs(parseFloat(e.target.value)).toString()
-                                                                }
-
-                                                                setPrice(e.target.value)
-                                                            }}
-                                                            className='p-2 rounded-lg bg-slate-400/40 font-bold' type="number" placeholder='5 Avax' />
-                                                        <button onClick={() => {
-                                                            setIsMakingOffer(false)
-                                                        }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>X</button>
-
+                                            <If
+                                                condition={!hasMadeOffer}
+                                            >
+                                                <Then>
+                                                    <div className='flex flex-col items-start mt-auto'>
                                                         <button
+                                                            onClick={() => setIsMakingOffer(true)}
+                                                            className='p-2 rounded-lg bg-slate-400/40 font-bold'>Make an Offer</button>
+                                                        <AnimatePresence>
+                                                            {isMakingOffer && <motion.div
 
-                                                            disabled={!canPutForSale()}
-                                                            onClick={async () => {
-                                                               
+                                                                initial={{ opacity: 0, width: 0 }}
+                                                                animate={{
+                                                                    opacity: 1, y: 0, width: '100%',
+                                                                    transition: {
+                                                                        duration: 0.2,
+                                                                        ease: "easeOut",
+                                                                    }
+                                                                }}
 
-                                                                setIsMakingOffer(false)
+                                                                exit={{
+                                                                    opacity: 0, y: 0, width: 0,
+                                                                    transition: {
+                                                                        duration: 0.2,
+                                                                        ease: "easeOut",
+                                                                    }
+                                                                }}
 
-                                                            }}
-                                                            className={`p-2 rounded-lg bg-slate-400/40 font-bold  
-                                        ${!canPutForSale() && 'bg-slate-400/20 cursor-not-allowed'}`}>{
-                                                                puttingForSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Submit'
-                                                            }</button>
+                                                                className='flex items-center mt-4 gap-x-2'>
+                                                                {/* Price inpurt */}
+                                                                <input
+                                                                    onChange={(e) => {
+                                                                        if (parseFloat(e.target.value) < 0) {
+                                                                            e.target.value = Math.abs(parseFloat(e.target.value)).toString()
+                                                                        }
+
+                                                                        setPrice(e.target.value)
+                                                                    }}
+                                                                    className='p-2 rounded-lg bg-slate-400/40 font-bold' type="number" placeholder='5 Avax' />
+                                                                <button onClick={() => {
+                                                                    setIsMakingOffer(false)
+                                                                }} className='p-2 rounded-lg bg-slate-400/40 font-bold'>X</button>
+
+                                                                <button
+
+                                                                    disabled={!canMakeOffer()}
+                                                                    onClick={async () => {
+                                                                       await makeOffer(
+                                                                            {
+                                                                                collectionAddress: id as string,
+                                                                                offer: price,
+                                                                                tokenId: nftid! as string,
+                                                                                signer: signer!,
+                                                                                userAddress: address as string
+                                                                            }
+                                                                        )
+
+                                                                        setIsMakingOffer(false)
+
+                                                                    }}
+                                                                    className={`p-2 rounded-lg bg-slate-400/40 font-bold  
+                                        ${!canMakeOffer() && 'bg-slate-400/20 cursor-not-allowed'}`}>{
+                                                                        puttingForSale ? <AiOutlineLoading3Quarters className='animate-spin' /> : 'Submit'
+                                                                    }</button>
 
 
-                                                    </motion.div>}
-                                                </AnimatePresence>
-                                            </div>
+                                                            </motion.div>}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </Then>
+                                                <Else>
+                                                    <span>
+                                                        Offer made
+                                                    </span>
+                                                </Else>
+                                            </If>
                                         </Else>
                                     </If>
                                 </Else>

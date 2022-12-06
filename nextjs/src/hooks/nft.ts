@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { MARKETPLACE_ADDRESS } from "../const/contracts/contractInfo";
 import { useSigner } from "wagmi";
 import { ifError } from "assert";
+import { StringMappingType } from "typescript";
 
 // Methods
 export const getCollectionFromAddress = async (
@@ -217,7 +218,7 @@ export const getOwnerNFTs = async (walletAddress: string) => {
 
     const userNFTs = await marketPlace.ownerToNFTs(walletAddress);
 
-    const parsedNFTs = userNFTs.map((nft : any) => ({
+    const parsedNFTs = userNFTs.map((nft: any) => ({
       collectionAddress: nft.collection,
       owner: nft.owner,
       tokenID: nft.tokenId.toString(),
@@ -228,6 +229,73 @@ export const getOwnerNFTs = async (walletAddress: string) => {
     return parsedNFTs;
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const makeOfferToNFT = async (
+  signer: Signer,
+  collectionAddress: string,
+  tokenId: string,
+  offer: string
+) => {
+  if (!signer) return alert("Invalid signer");
+
+  try {
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      signer
+    );
+
+    const makeOffer = await marketPlace.makeOfferForNFT(
+      collectionAddress,
+      tokenId,
+      {
+        value: ethers.utils.parseEther(offer),
+      }
+    );
+
+    await makeOffer.wait();
+  } catch (e) {
+    console.error(e);
+    alert("Error making offer to NFT");
+  }
+};
+
+export const hasMadeOfferToNFT = async (
+  userAddress: string,
+  collectionAddress: string,
+  tokenId: string
+) => {
+  if (!userAddress || !collectionAddress || !tokenId) return false;
+
+
+
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
+    );
+
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      provider
+    );
+
+
+
+    const hasMadeOffer = await marketPlace.hasUserMadeOfferOnNFT(
+      userAddress,
+      collectionAddress,
+      parseInt(tokenId)
+    );
+
+
+
+    return hasMadeOffer;
+  } catch (e) {
+    console.error("This is our error",e);
+
   }
 };
 
@@ -367,5 +435,54 @@ export const useBuyNFT = () => {
 export const useGetOwnerNFTs = (walletAddress: string) => {
   return useQuery(["userNFTs", walletAddress], () =>
     getOwnerNFTs(walletAddress)
+  );
+};
+
+export const useHasMadeOfferToNFT = (
+  userAddress: string,
+  collectionAddress: string,
+  tokenId: string
+) => {
+  return useQuery(
+    ["hasMadeOffer", userAddress, collectionAddress, parseInt(tokenId)],
+    () => hasMadeOfferToNFT(userAddress, collectionAddress, tokenId)
+  );
+};
+
+export const useMakeOfferToNFT = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: {
+      signer: Signer;
+      collectionAddress: string;
+      tokenId: string;
+      offer: string;
+      userAddress: string;
+    }) =>
+      await makeOfferToNFT(
+        data.signer,
+        data.collectionAddress,
+        data.tokenId,
+        data.offer
+      ),
+    {
+      onSuccess: async (_, { collectionAddress, tokenId, userAddress }) => {
+        console.log("Invalidating queries: ", collectionAddress, tokenId);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: [
+            "hasMadeOffer",
+            userAddress,
+            collectionAddress,
+            parseInt(tokenId),
+          ],
+        });
+      },
+    }
   );
 };

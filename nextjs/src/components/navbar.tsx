@@ -44,10 +44,10 @@ const NavBar = () => {
             name: "My NFTs",
             href: `/${address}`,
         },
-        {
-            name: "Offers",
-            href: "/offers",
-        },
+        // {
+        //     name: "Offers",
+        //     href: "/offers",
+        // },
     ]
 
     return <nav ref={navbarRef} className='flex w-full items-center justify-between  p-4 border-b-[1px] border-b-kichou-gray'>
