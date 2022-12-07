@@ -269,7 +269,34 @@ export const hasMadeOfferToNFT = async (
 ) => {
   if (!userAddress || !collectionAddress || !tokenId) return false;
 
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.NEXT_PUBLIC_ALCHEMY_FUJI
+    );
 
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      provider
+    );
+
+    const hasMadeOffer = await marketPlace.hasUserMadeOfferOnNFT(
+      userAddress,
+      collectionAddress,
+      parseInt(tokenId)
+    );
+
+    return hasMadeOffer;
+  } catch (e) {
+    console.error("This is our error", e);
+  }
+};
+
+export const getNFTOffers = async (
+  collectionAddress: string,
+  tokenId: string
+) => {
+  if (!collectionAddress || !tokenId) return;
 
   try {
     const provider = new ethers.providers.JsonRpcProvider(
@@ -282,20 +309,86 @@ export const hasMadeOfferToNFT = async (
       provider
     );
 
-
-
-    const hasMadeOffer = await marketPlace.hasUserMadeOfferOnNFT(
-      userAddress,
+    const offers = await marketPlace.getOffersForNFT(
       collectionAddress,
       parseInt(tokenId)
     );
 
+    const parsedOffers = offers.map((offer: any) => ({
+      buyer: offer.buyer,
+      offer: ethers.utils.formatEther(offer.price),
+    }));
 
-
-    return hasMadeOffer;
+    return parsedOffers;
   } catch (e) {
-    console.error("This is our error",e);
+    console.error(e);
+  }
+};
 
+export const acceptOffer = async (
+  signer: Signer,
+  buyer: string,
+  collectionAddress: string,
+  tokenId: string
+) => {
+  if (!signer) return alert("Invalid signer");
+
+  try {
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      signer
+    );
+
+    const collectionContract = new ethers.Contract(
+      collectionAddress,
+      MarketItem.abi,
+      signer
+    );
+
+    const approve = await collectionContract.approve(
+      MARKETPLACE_ADDRESS,
+      tokenId
+    );
+
+    await approve.wait();
+
+    const acceptOffer = await marketPlace.acceptOfferForNFT(
+      collectionAddress,
+      parseInt(tokenId),
+      buyer
+    );
+
+    await acceptOffer.wait();
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const rejectOffer = async (
+  signer: Signer,
+  buyer: string,
+  collectionAddress: string,
+  tokenId: string
+) => {
+  if (!signer) return alert("Invalid signer");
+
+  try {
+    const marketPlace = new ethers.Contract(
+      MARKETPLACE_ADDRESS,
+      MarketItemFactory.abi,
+      signer
+    );
+
+    const rejectOffer = await marketPlace.rejectOfferForNFT(
+      collectionAddress,
+      parseInt(tokenId),
+      buyer
+    );
+
+    await rejectOffer.wait();
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -486,3 +579,73 @@ export const useMakeOfferToNFT = () => {
     }
   );
 };
+
+export const useGetNFTOffers = (collectionAddress: string, tokenId: string) => {
+  return useQuery(["NFTOffers", collectionAddress, parseInt(tokenId)], () =>
+    getNFTOffers(collectionAddress, tokenId)
+  );
+};
+
+export const useAcceptOffer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: {
+      signer: Signer;
+      collectionAddress: string;
+      tokenId: string;
+      buyer: string;
+    }) =>
+      await acceptOffer(
+        data.signer,
+        data.buyer,
+        data.collectionAddress,
+        data.tokenId
+      ),
+    {
+      onSuccess: async (_, { collectionAddress, tokenId }) => {
+        console.log("Invalidating queries: ", collectionAddress, tokenId);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFTOffers", collectionAddress, parseInt(tokenId)],
+        });
+      },
+    }
+  );
+};
+
+export const useRejectOffer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: {
+      signer: Signer;
+      collectionAddress: string;
+      tokenId: string;
+      buyer: string;
+    }) =>
+      await rejectOffer(
+        data.signer,
+        data.buyer,
+        data.collectionAddress,
+        data.tokenId
+      ),
+    {
+      onSuccess: async (_, { collectionAddress, tokenId }) => {
+        console.log("Invalidating queries: ", collectionAddress, tokenId);
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFT", collectionAddress, parseInt(tokenId)],
+        });
+
+        await queryClient.invalidateQueries({
+          queryKey: ["NFTOffers", collectionAddress, parseInt(tokenId)],
+        });
+      },
+    }
+  );
+}

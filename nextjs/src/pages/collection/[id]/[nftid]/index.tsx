@@ -19,11 +19,12 @@ import { navbarHightAtom } from "../../../../utils/global-state"
 
 // Hooks import
 import { useGetCollectionFromAddress, useGetNFTCollections } from '../../../../hooks/collection';
-import { useBuyNFT, useGetNFTById, useHasMadeOfferToNFT, useMakeOfferToNFT, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
+import { useBuyNFT, useGetNFTById, useGetNFTOffers, useHasMadeOfferToNFT, useMakeOfferToNFT, usePutNFTForSale, useRemoveFromSale } from '../../../../hooks/nft';
 import { useState } from 'react';
 import { ethers } from 'ethers';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
+import OffersModal from '../../../../components/offers-modal';
 
 
 export default function Collection() {
@@ -32,6 +33,7 @@ export default function Collection() {
     const [isPuttingForSale, setIsPuttingForSale] = useState(false);
     const [isMakingOffer, setIsMakingOffer] = useState(false);
     const [price, setPrice] = useState<string>("");
+    const [isOffersModalOpen, setIsOffersModalOpen] = useState(false);
 
     // Global state
     const [navbarHight] = useAtom(navbarHightAtom);
@@ -50,6 +52,8 @@ export default function Collection() {
 
     const { data: hasMadeOffer, isLoading: loadingOffer } = useHasMadeOfferToNFT(address as string, id as string, nftid as string)
 
+    const { data: NFTOffers, isLoading: loadingNFTOffers } = useGetNFTOffers(id as string, nftid! as string)
+
     const { mutateAsync: putForSale, isLoading: puttingForSale } = usePutNFTForSale(
     )
 
@@ -60,7 +64,7 @@ export default function Collection() {
 
     const { mutateAsync: makeOffer, isLoading: makingOffer } = useMakeOfferToNFT()
 
-    if (loadingNFT || loadingOffer) return <div>Loading...</div>
+    if (loadingNFT || loadingOffer || loadingNFTOffers) return <div>Loading...</div>
 
     if (!loadingNFT && nftData == null && id !== undefined && nftid !== undefined) {
         router.replace("/404")
@@ -136,8 +140,20 @@ export default function Collection() {
                                     <If condition={!nftData?.isForSale}>
 
                                         <Then>
-                                            <div className='w-full flex items-center justify-start'>
+                                            <div className='w-full flex items-center justify-start gap-x-4'>
                                                 <button onClick={() => setIsPuttingForSale(true)} className='p-2 rounded-lg bg-slate-400/40 font-bold'>Put for sale</button>
+                                                {
+                                                    NFTOffers.filter((offer: {
+                                                        buyer: string;
+                                                        price: number;
+                                                    }) => {
+                                                        return offer.buyer !== ethers.constants.AddressZero
+                                                    })?.length > 0 &&
+                                                    <button
+                                                        onClick={() => setIsOffersModalOpen(true)}
+                                                        className='p-2 rounded-lg bg-slate-400/40 font-bold'>
+                                                        View Offers
+                                                    </button>}
                                             </div>
 
 
@@ -288,7 +304,7 @@ export default function Collection() {
 
                                                                     disabled={!canMakeOffer()}
                                                                     onClick={async () => {
-                                                                       await makeOffer(
+                                                                        await makeOffer(
                                                                             {
                                                                                 collectionAddress: id as string,
                                                                                 offer: price,
@@ -325,6 +341,13 @@ export default function Collection() {
                     </If>
                 </div>
             </div>
+
+            {
+                isOffersModalOpen && <OffersModal setIsModalOpen={setIsOffersModalOpen}
+                    collectionAddress={id as string}
+                    tokenId={nftid! as string}
+                />
+            }
 
 
         </div >

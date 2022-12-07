@@ -31,7 +31,7 @@ contract MarketPlace is Ownable {
     event MarketItemCreated(address indexed itemAddress, address indexed owner);
 
     uint256 public marketPlacePercentage = 10;
-    uint256 private marketPlaceProfit = 0;
+    uint256 public marketPlaceProfit = 0;
 
     struct Offers {
         address buyer;
@@ -43,6 +43,7 @@ contract MarketPlace is Ownable {
         address owner;
         uint256 tokenId;
         uint256 price;
+        uint256 indexInArray;
         bool isForSale;
     }
 
@@ -53,8 +54,8 @@ contract MarketPlace is Ownable {
         public doesUserOwnNFTInCollection;
     mapping(address => NFT[]) private _ownerToNFTs;
     mapping(address => mapping(uint256 => NFT)) public nfts;
-    mapping(address => mapping(uint256 => Offers[])) public nftToOffers;
 
+    mapping(address => mapping(uint256 => Offers[])) private _nftToOffers;
     // A way to track if a user has made an offer on a specific NFT
     mapping(address => mapping(string => bool)) private _hasUserMadeOfferOnNFT;
     mapping(address => mapping(string => uint256)) private userNFTOFferIndex;
@@ -128,14 +129,6 @@ contract MarketPlace is Ownable {
         MarketItem marketItem = MarketItem(_collection);
         uint256 tokenId = marketItem.safeMint(_to, _tokenURI);
 
-        nfts[_collection][tokenId] = NFT({
-            collection: _collection,
-            owner: _to,
-            tokenId: tokenId,
-            price: 0,
-            isForSale: false
-        });
-
         bool doesUserOwnNFT = doesUserOwnNFTInCollection[_to][_collection];
 
         if (!doesUserOwnNFT) {
@@ -143,15 +136,21 @@ contract MarketPlace is Ownable {
             doesUserOwnNFTInCollection[_to][_collection] = true;
         }
 
-        _ownerToNFTs[_to].push(
-            NFT({
-                collection: _collection,
-                owner: _to,
-                tokenId: tokenId,
-                price: 0,
-                isForSale: false
-            })
-        );
+        uint256 newNFTIndex = _ownerToNFTs[_to].length;
+
+        NFT memory newNFT = NFT({
+            collection: _collection,
+            owner: _to,
+            tokenId: tokenId,
+            price: 0,
+            indexInArray: newNFTIndex,
+            isForSale: false
+        });
+
+        nfts[_collection][tokenId] = newNFT;
+
+        _ownerToNFTs[_to].push(newNFT);
+
         _totalNFTCounter.increment();
     }
 
@@ -217,7 +216,7 @@ contract MarketPlace is Ownable {
             revert MarketPlace__PriceCannotBeZero();
         }
 
-        nftToOffers[_collection][_tokenId].push(
+        _nftToOffers[_collection][_tokenId].push(
             Offers({buyer: msg.sender, price: msg.value})
         );
 
@@ -227,7 +226,7 @@ contract MarketPlace is Ownable {
 
         userNFTOFferIndex[msg.sender][
             string(abi.encodePacked(_collection, _tokenId))
-        ] = nftToOffers[_collection][_tokenId].length - 1;
+        ] = _nftToOffers[_collection][_tokenId].length - 1;
     }
 
     function widthdrawOfferForNFT(
@@ -252,18 +251,18 @@ contract MarketPlace is Ownable {
             string(abi.encodePacked(_collection, _tokenId))
         ];
 
-        Offers memory offer = nftToOffers[_collection][_tokenId][offerIndex];
-        uint256 offersLength = nftToOffers[_collection][_tokenId].length;
+        Offers memory offer = _nftToOffers[_collection][_tokenId][offerIndex];
+        uint256 offersLength = _nftToOffers[_collection][_tokenId].length;
 
         if (offer.buyer != msg.sender) {
             revert MarketPlace__OfferDoesNotExist();
         }
 
-        nftToOffers[_collection][_tokenId][offerIndex] = nftToOffers[
+        _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
             _collection
         ][_tokenId][offersLength - 1];
 
-        delete nftToOffers[_collection][_tokenId][offersLength - 1];
+        delete _nftToOffers[_collection][_tokenId][offersLength - 1];
 
         _hasUserMadeOfferOnNFT[msg.sender][
             string(abi.encodePacked(_collection, _tokenId))
@@ -291,35 +290,68 @@ contract MarketPlace is Ownable {
             revert MarketPlace__OfferDoesNotExist();
         }
 
+        // Getting offer index from Offers array
         uint256 offerIndex = userNFTOFferIndex[_buyer][
             string(abi.encodePacked(_collection, _tokenId))
         ];
 
-        Offers memory offer = nftToOffers[_collection][_tokenId][offerIndex];
-        uint256 offersLength = nftToOffers[_collection][_tokenId].length;
+        // Getting offer from Offers array
+        Offers memory offer = _nftToOffers[_collection][_tokenId][offerIndex];
+
+        // Getting length of Offers array
+        uint256 offersLength = _nftToOffers[_collection][_tokenId].length;
 
         if (offer.buyer != _buyer) {
             revert MarketPlace__OfferDoesNotExist();
         }
 
+        // Transfering NFT to buyer
         marketItem.safeTransferFrom(msg.sender, _buyer, _tokenId);
 
-        nfts[_collection][_tokenId].owner = _buyer;
-
-        nftToOffers[_collection][_tokenId][offerIndex] = nftToOffers[
+        // Removing offer from Offers array
+        _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
             _collection
         ][_tokenId][offersLength - 1];
 
-        delete nftToOffers[_collection][_tokenId][offersLength - 1];
+        delete _nftToOffers[_collection][_tokenId][offersLength - 1];
 
+        // Getting NFT from nfts mapping
+        NFT memory nft = nfts[_collection][_tokenId];
+
+        // Removing NFT from previous owner NFT array
+        uint256 nftIndex = nft.indexInArray;
+        uint256 nftsLength = _ownerToNFTs[msg.sender].length;
+
+        _ownerToNFTs[msg.sender][nftIndex] = _ownerToNFTs[msg.sender][
+            nftsLength - 1
+        ];
+        delete _ownerToNFTs[msg.sender][nftsLength - 1];
+
+        // Getting new index of NFT in array
+        uint256 newNFTIndex = _ownerToNFTs[_buyer].length;
+
+        // Updating NFT details
+        nft.indexInArray = newNFTIndex;
+        nft.price = 0;
+        nft.isForSale = false;
+        nft.owner = _buyer;
+
+        // Adding NFT to new owner NFT array
+        _ownerToNFTs[_buyer].push(nft);
+
+        // Updating nfts mapping
+        nfts[_collection][_tokenId] = nft;
+
+        // Updating _hasUserMadeOfferOnNFT mapping
         _hasUserMadeOfferOnNFT[_buyer][
             string(abi.encodePacked(_collection, _tokenId))
         ] = false;
 
+        // Calculating market place fee
         uint256 marketPlaceFee = offer.price * (marketPlacePercentage / 100);
-
         marketPlaceProfit += marketPlaceFee;
 
+        // Transfering NFT price to seller
         payable(msg.sender).transfer(offer.price - marketPlaceFee);
     }
 
@@ -346,18 +378,18 @@ contract MarketPlace is Ownable {
             string(abi.encodePacked(_collection, _tokenId))
         ];
 
-        Offers memory offer = nftToOffers[_collection][_tokenId][offerIndex];
-        uint256 offersLength = nftToOffers[_collection][_tokenId].length;
+        Offers memory offer = _nftToOffers[_collection][_tokenId][offerIndex];
+        uint256 offersLength = _nftToOffers[_collection][_tokenId].length;
 
         if (offer.buyer != _buyer) {
             revert MarketPlace__OfferDoesNotExist();
         }
 
-        nftToOffers[_collection][_tokenId][offerIndex] = nftToOffers[
+        _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
             _collection
         ][_tokenId][offersLength - 1];
 
-        delete nftToOffers[_collection][_tokenId][offersLength - 1];
+        delete _nftToOffers[_collection][_tokenId][offersLength - 1];
 
         _hasUserMadeOfferOnNFT[_buyer][
             string(abi.encodePacked(_collection, _tokenId))
@@ -391,9 +423,28 @@ contract MarketPlace is Ownable {
 
         marketItem.safeTransferFrom(oldOwner, msg.sender, _tokenId);
 
-        nfts[_collection][_tokenId].owner = msg.sender;
-        nfts[_collection][_tokenId].price = msg.value;
-        nfts[_collection][_tokenId].isForSale = false;
+
+        // Updaing NFT details
+        nft.owner = msg.sender;
+        nft.price = msg.value;
+        nft.isForSale = false;
+
+        // Removing NFT from previous owner NFT array
+        uint256 nftIndex = nft.indexInArray;
+        uint256 nftsLength = _ownerToNFTs[oldOwner].length;
+        _ownerToNFTs[oldOwner][nftIndex] = _ownerToNFTs[oldOwner][
+            nftsLength - 1
+        ];
+        delete _ownerToNFTs[oldOwner][nftsLength - 1];
+
+
+        // Adding NFT to new owner NFT array
+        uint256 newNFTIndex = _ownerToNFTs[msg.sender].length;
+        nft.indexInArray = newNFTIndex;
+        _ownerToNFTs[msg.sender].push(nft);
+
+        // Updating nfts mapping
+        nfts[_collection][_tokenId] = nft;
 
         uint256 marketPlaceFee = msg.value * (marketPlacePercentage / 100);
 
@@ -415,6 +466,13 @@ contract MarketPlace is Ownable {
 
     function ownerToNFTs(address _owner) external view returns (NFT[] memory) {
         return _ownerToNFTs[_owner];
+    }
+
+    function getOffersForNFT(
+        address _collection,
+        uint256 _tokenId
+    ) external view returns (Offers[] memory) {
+        return _nftToOffers[_collection][_tokenId];
     }
 
     // MarketPlace Owner Methods

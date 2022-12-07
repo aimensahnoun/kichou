@@ -26,13 +26,20 @@ export default function MyNfts() {
     const { user } = router.query
 
     // Wagmi
-    const { address } = useAccount()
+    const { address , isConnected } = useAccount()
 
     // React Query
     const { data: userNFTs, isLoading: loadingNFTs } = useGetOwnerNFTs(user as string)
 
 
-
+    if(!isConnected) return <div className='flex justify-center items-center h-screen'>
+        <div className='flex flex-col items-center gap-y-4'>
+            <Image src='/logo.svg' alt='Kichō Logo' width={70} height={70} />
+            <span className='text-2xl font-bold'>Kichō</span>
+            <span className='text-xl font-bold'>貴重</span>
+            <span className='text-xl font-bold'>Please connect your wallet</span>
+        </div>
+    </div>
 
     if (loadingNFTs) return <div className='flex justify-center items-center h-screen'>
         <div className='flex flex-col items-center gap-y-4'>

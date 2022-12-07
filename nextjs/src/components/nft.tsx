@@ -19,6 +19,11 @@ const NFT = ({ collectionId, nftIndex }: {  collectionId: string, nftIndex: numb
     // React Query
     usePrefetchNFTByID(collectionId, nftIndex)
 
+
+    if(collectionId === ethers.constants.AddressZero){
+        return null
+    }
+
     if (loadingNFT) {
         return <div className="w-[90vw] h-[17rem] md:w-[14rem] md:h-[14rem] bg-gray-500/25 shadow-lg backdrop-blur rounded-lg backdrop-filter">
 
