@@ -30,7 +30,7 @@ contract MarketPlace is Ownable {
 
     event MarketItemCreated(address indexed itemAddress, address indexed owner);
 
-    uint256 public marketPlacePercentage = 10;
+    uint256 public constant MARKETPLACEPERCENTAGE = 10;
     uint256 public marketPlaceProfit = 0;
 
     struct Offers {
@@ -39,12 +39,12 @@ contract MarketPlace is Ownable {
     }
 
     struct NFT {
+        bool isForSale;
         address collection;
         address owner;
         uint256 tokenId;
         uint256 price;
         uint256 indexInArray;
-        bool isForSale;
     }
 
     mapping(address => address) public collectionToOwner;
@@ -64,8 +64,8 @@ contract MarketPlace is Ownable {
 
     // Collection Methods
     function createMarketItem(
-        string memory _name,
-        string memory _symbol
+        string calldata _name,
+        string calldata _symbol
     ) external {
         if (keccak256(bytes(_name)) == keccak256(bytes(""))) {
             revert MarketPlace__CollectionNameCannotBeEmpty();
@@ -107,7 +107,7 @@ contract MarketPlace is Ownable {
     function mintNFT(
         address _collection,
         address _to,
-        string memory _tokenURI
+        string calldata _tokenURI
     ) external {
         address collectionOwner = collectionToOwner[_collection];
 
@@ -348,7 +348,7 @@ contract MarketPlace is Ownable {
         ] = false;
 
         // Calculating market place fee
-        uint256 marketPlaceFee = offer.price * (marketPlacePercentage / 100);
+        uint256 marketPlaceFee = offer.price / MARKETPLACEPERCENTAGE;
         marketPlaceProfit += marketPlaceFee;
 
         // Transfering NFT price to seller
@@ -423,7 +423,6 @@ contract MarketPlace is Ownable {
 
         marketItem.safeTransferFrom(oldOwner, msg.sender, _tokenId);
 
-
         // Updaing NFT details
         nft.owner = msg.sender;
         nft.price = msg.value;
@@ -437,7 +436,6 @@ contract MarketPlace is Ownable {
         ];
         delete _ownerToNFTs[oldOwner][nftsLength - 1];
 
-
         // Adding NFT to new owner NFT array
         uint256 newNFTIndex = _ownerToNFTs[msg.sender].length;
         nft.indexInArray = newNFTIndex;
@@ -446,7 +444,7 @@ contract MarketPlace is Ownable {
         // Updating nfts mapping
         nfts[_collection][_tokenId] = nft;
 
-        uint256 marketPlaceFee = msg.value * (marketPlacePercentage / 100);
+        uint256 marketPlaceFee = msg.value / MARKETPLACEPERCENTAGE;
 
         marketPlaceProfit += marketPlaceFee;
 
@@ -479,4 +477,6 @@ contract MarketPlace is Ownable {
     function withdrawMarketPlaceProfit() external onlyOwner {
         payable(msg.sender).transfer(marketPlaceProfit);
     }
+
+   
 }

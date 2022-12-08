@@ -25,7 +25,7 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
 
     function safeMint(
         address to,
-        string memory uri
+        string calldata uri
     ) public onlyOwner returns (uint256) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
