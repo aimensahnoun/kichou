@@ -305,9 +305,6 @@ contract MarketPlace is Ownable {
             revert MarketPlace__OfferDoesNotExist();
         }
 
-        // Transfering NFT to buyer
-        marketItem.safeTransferFrom(msg.sender, _buyer, _tokenId);
-
         // Removing offer from Offers array
         _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
             _collection
@@ -350,6 +347,9 @@ contract MarketPlace is Ownable {
         // Calculating market place fee
         uint256 marketPlaceFee = offer.price / MARKETPLACEPERCENTAGE;
         marketPlaceProfit += marketPlaceFee;
+
+        // Transfering NFT to buyer
+        marketItem.safeTransferFrom(msg.sender, _buyer, _tokenId);
 
         // Transfering NFT price to seller
         payable(msg.sender).transfer(offer.price - marketPlaceFee);
@@ -421,8 +421,6 @@ contract MarketPlace is Ownable {
 
         address oldOwner = marketItem.ownerOf(_tokenId);
 
-        marketItem.safeTransferFrom(oldOwner, msg.sender, _tokenId);
-
         // Updaing NFT details
         nft.owner = msg.sender;
         nft.price = msg.value;
@@ -448,6 +446,7 @@ contract MarketPlace is Ownable {
 
         marketPlaceProfit += marketPlaceFee;
 
+        marketItem.safeTransferFrom(oldOwner, msg.sender, _tokenId);
         payable(oldOwner).transfer(msg.value - marketPlaceFee);
     }
 
@@ -477,6 +476,4 @@ contract MarketPlace is Ownable {
     function withdrawMarketPlaceProfit() external onlyOwner {
         payable(msg.sender).transfer(marketPlaceProfit);
     }
-
-   
 }
