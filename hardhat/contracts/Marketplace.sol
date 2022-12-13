@@ -210,7 +210,7 @@ contract MarketPlace is Ownable {
         return (ownerToCollections[_owner]);
     }
 
-    ///@dev This function is used to get the count of
+    ///@dev This function is used to get the count of NFTs
     function totalNFTCount() external view returns (uint256) {
         return _totalNFTCounter.current();
     }
