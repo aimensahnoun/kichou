@@ -11,11 +11,16 @@ error MarketItem__CannotMintToZeroAddress(address to);
 error MarketItem__OnlyOwnerCanMint(address collection);
 error MarketItem__OnlyOwnerCanSetNFTForSale();
 
+/// @title MarketItem - A contract for a single NFT collection
+/// @author Aimen Sahnoun
 contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
 
+    /// @dev Constructor for the MarketItem contract, which inherits from the ERC721 contract, increments the token counter in order to start from 1 and not 0
+    /// @param _collectionName The name of the NFT collection
+    /// @param _collectionSymbol The symbol of the NFT collection
     constructor(
         string memory _collectionName,
         string memory _collectionSymbol
@@ -23,6 +28,9 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         _tokenIdCounter.increment();
     }
 
+    /// @dev Mints a new NFT and sets the token URI
+    /// @param to The address of the owner of the NFT
+    /// @param uri The token URI of the NFT
     function safeMint(
         address to,
         string calldata uri
@@ -35,18 +43,26 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         return tokenId;
     }
 
+    /// @dev Burns an NFT
+    /// @param tokenId The ID of the NFT to burn
     function _burn(
         uint256 tokenId
     ) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }
 
+    /// @dev Returns the token URI of an NFT
+    /// @param tokenId The ID of the NFT
+    /// @return The token URI of the NFT
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
+
+    /// @dev Returns the number of NFTs in the collection
+    /// @return The number of NFTs in the collection
     function getNFTCount() public view returns (uint256) {
         return _tokenIdCounter.current() - 1;
     }
