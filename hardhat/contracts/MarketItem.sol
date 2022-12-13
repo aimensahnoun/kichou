@@ -9,7 +9,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 error MarketItem__CannotMintToZeroAddress(address to);
 error MarketItem__OnlyOwnerCanMint(address collection);
-error MarketItem__OnlyOwnerCanSetNFTForSale();
+
+error MarketItem__DoesNotHavePermissionToBurn();
 
 /// @title MarketItem - A contract for a single NFT collection
 /// @author Aimen Sahnoun
@@ -43,13 +44,13 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
         return tokenId;
     }
 
-    /// @dev Burns an NFT
-    /// @param tokenId The ID of the NFT to burn
     function _burn(
         uint256 tokenId
     ) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }
+
+
 
     /// @dev Returns the token URI of an NFT
     /// @param tokenId The ID of the NFT
@@ -59,7 +60,6 @@ contract MarketItem is ERC721, ERC721URIStorage, ERC721Burnable, Ownable {
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
-
 
     /// @dev Returns the number of NFTs in the collection
     /// @return The number of NFTs in the collection
