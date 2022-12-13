@@ -347,11 +347,6 @@ contract MarketPlace is Ownable {
         Offers memory offer = _nftToOffers[_collection][_tokenId][offerIndex];
         uint256 offersLength = _nftToOffers[_collection][_tokenId].length;
 
-        // Check if the offer is made by the user
-        if (offer.buyer != msg.sender) {
-            revert MarketPlace__OfferDoesNotExist();
-        }
-
         // Remove the offer from the NFT's offer array
         _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
             _collection
@@ -368,7 +363,7 @@ contract MarketPlace is Ownable {
         payable(msg.sender).transfer(offer.price);
     }
 
-    ///@dev This function is used to accept an offer for an NFT
+    ///@dev This function is used to accept an offer for an NFT,NFT owner needs to approve this contract to transfer the NFT before calling this function, otherwise the transaction will fail
     ///@param _collection The address of the collection
     ///@param _tokenId The token id of the NFT
     ///@param _buyer The address of the buyer
@@ -404,10 +399,6 @@ contract MarketPlace is Ownable {
 
         // Getting length of Offers array
         uint256 offersLength = _nftToOffers[_collection][_tokenId].length;
-
-        if (offer.buyer != _buyer) {
-            revert MarketPlace__OfferDoesNotExist();
-        }
 
         // Removing offer from Offers array
         _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
@@ -493,11 +484,6 @@ contract MarketPlace is Ownable {
         // Getting offer from Offers array
         Offers memory offer = _nftToOffers[_collection][_tokenId][offerIndex];
         uint256 offersLength = _nftToOffers[_collection][_tokenId].length;
-
-        //  Checking if the offer is made by the buyer
-        if (offer.buyer != _buyer) {
-            revert MarketPlace__OfferDoesNotExist();
-        }
 
         // Removing offer from Offers array
         _nftToOffers[_collection][_tokenId][offerIndex] = _nftToOffers[
